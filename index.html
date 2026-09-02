@@ -1,353 +1,107 @@
 <!doctype html>
 <html lang="da">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bålbortførelsen</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400;1,9..144,600&family=Azeret+Mono:wght@400;500;700&family=Instrument+Sans:wght@400;500;600&display=swap">
-<style>
-  :root {
-    --night: #0A0E1A;
-    --night-2: #111728;
-    --surface: rgba(255, 244, 228, 0.045);
-    --line: rgba(255, 244, 228, 0.14);
-    --ink: #F6EFE4;
-    --ink-2: #C9C1B6;
-    --ink-3: #8C8798;
-    --smoke: #9A93A8;
-    --ember: #FF8A3D;
-    --ember-soft: rgba(255, 138, 61, 0.16);
-    --amber: #FFC46B;
-    --amber-soft: rgba(255, 196, 107, 0.18);
-    --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
-    --font-ui: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
-    --font-mono: "Azeret Mono", "SFMono-Regular", Menlo, Consolas, monospace;
-  }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    margin: 0; background: var(--night); color: var(--ink);
-    font-family: var(--font-ui); font-size: 17px; line-height: 1.55;
-    min-height: 100vh; position: relative; overflow-x: hidden;
-  }
-  canvas#sky { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-  .glow {
-    position: fixed; left: 0; right: 0; bottom: 0; height: 55vh; z-index: 0; pointer-events: none;
-    background: radial-gradient(60% 80% at 50% 110%, rgba(255, 138, 61, 0.42), rgba(255, 90, 40, 0.16) 45%, transparent 75%);
-  }
-  canvas#embers { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
-  canvas#sparks { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 20; pointer-events: none; }
-  .wrap { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; padding: 48px 24px 120px; }
-
-  .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
-  .eyebrow b { color: var(--amber); font-weight: 500; }
-  .status { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; color: var(--ink-3); margin-top: 6px; }
-  .status .ok { color: var(--amber); }
-  .status .bad { color: var(--ember); text-decoration: line-through; text-decoration-color: var(--ember); }
-
-  h1 {
-    font-family: var(--font-display); font-style: italic; font-weight: 500; letter-spacing: -0.015em;
-    font-size: clamp(46px, 9.5vw, 96px); line-height: 0.98; margin: 28px 0 0; text-wrap: balance;
-  }
-  h1 .fire { color: var(--ember); font-style: italic; }
-  .lede { font-size: clamp(18px, 2.3vw, 21px); color: var(--ink-2); max-width: 30em; margin: 22px 0 0; }
-  .lede b { color: var(--ink); font-weight: 600; }
-
-  .notice { position: relative; margin-top: 40px; padding: 22px 24px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
-  .stamp {
-    position: absolute; right: 18px; top: -14px; transform: rotate(6deg);
-    font-family: var(--font-mono); font-weight: 700; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
-    color: var(--ember); border: 2px solid var(--ember); border-radius: 6px; padding: 6px 10px; background: var(--night);
-    box-shadow: 0 0 0 3px var(--night);
-  }
-  dl { display: grid; grid-template-columns: max-content 1fr; gap: 10px 22px; margin: 0; }
-  dt { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); padding-top: 4px; }
-  dd { margin: 0; color: var(--ink); }
-  dd small { display: block; color: var(--ink-3); font-size: 14px; }
-  @media (max-width: 480px) { dl { grid-template-columns: 1fr; gap: 4px; } dd { margin-bottom: 8px; } }
-
-  section { margin-top: 64px; }
-  h2 { font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: clamp(28px, 4vw, 38px); margin: 0 0 18px; line-height: 1.1; text-wrap: balance; }
-  h2 .fire { color: var(--ember); }
-
-  .menu { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
-  .menu li { display: grid; grid-template-columns: 40px 1fr; gap: 18px; align-items: start; padding: 18px 0; border-bottom: 1px solid var(--line); }
-  .menu svg { width: 36px; height: 36px; margin-top: 2px; }
-  .menu .name { font-family: var(--font-display); font-style: italic; font-size: 24px; line-height: 1.15; }
-  .menu .desc { color: var(--ink-2); margin-top: 2px; }
-
-  .hair p { color: var(--ink-2); max-width: 34em; margin: 0 0 14px; }
-  .hair p b { color: var(--ink); }
-  .plan { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 10px; }
-  .plan li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: baseline; padding: 14px 16px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
-  .plan .n { font-family: var(--font-mono); font-weight: 700; color: var(--amber); font-size: 14px; }
-  .plan .t { color: var(--ink); }
-  .plan .t small { display: block; color: var(--ink-3); font-size: 14px; }
-
-  .rsvp { margin-top: 72px; padding: 28px 24px 32px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); position: relative; min-height: 320px; overflow: hidden; }
-  .rsvp h2 { margin-bottom: 6px; }
-  .rsvp .q { color: var(--ink-2); margin: 0 0 22px; }
-  .buttons { position: relative; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; min-height: 160px; }
-  button.btn {
-    font: inherit; font-weight: 600; cursor: pointer; border-radius: 999px; padding: 14px 26px; font-size: 18px;
-    border: 1px solid var(--line); background: var(--night-2); color: var(--ink);
-  }
-  button.btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
-  .yes { background: var(--ember); border-color: var(--ember); color: #2A1206; transform-origin: left center; transform: scale(var(--grow, 1)); }
-  .yes:hover { filter: brightness(1.07); }
-  .no { position: relative; user-select: none; -webkit-user-select: none; touch-action: none; }
-  .no.fled { position: absolute; }
-  .taunt { margin-top: 14px; font-family: var(--font-display); font-style: italic; font-size: 20px; color: var(--ink-2); min-height: 1.5em; }
-  .done { display: none; }
-  .rsvp.confirmed .buttons, .rsvp.confirmed .q, .rsvp.confirmed .taunt { display: none; }
-  .rsvp.confirmed .done { display: block; }
-  .done .big { font-family: var(--font-display); font-style: italic; font-size: clamp(30px, 5vw, 44px); color: var(--amber); line-height: 1.1; margin: 0 0 10px; }
-  .done p { color: var(--ink-2); margin: 0 0 6px; max-width: 34em; }
-  .done .stamp { position: static; display: inline-block; margin-top: 16px; transform: rotate(-4deg); color: var(--amber); border-color: var(--amber); }
-
-  footer { margin-top: 56px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; color: var(--ink-3); text-transform: uppercase; }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .yes { transition: transform 260ms cubic-bezier(.2,.9,.3,1.3); }
-    .no { transition: left 180ms ease, top 180ms ease, transform 180ms ease; }
-    h1, .lede, .notice { animation: rise 700ms cubic-bezier(.2,.8,.2,1) both; }
-    .lede { animation-delay: 120ms; } .notice { animation-delay: 240ms; }
-    @keyframes rise { from { opacity: 0.4; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-    .glow { animation: flicker 3.2s ease-in-out infinite alternate; }
-    @keyframes flicker { from { opacity: 0.85; } 40% { opacity: 1; } 70% { opacity: 0.9; } to { opacity: 1; } }
-  }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Bålbortførelsen</title>
+  <meta name="description" content="Du bliver bortført. Til bål.">
+  <meta name="theme-color" content="#0A0E1A">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400;1,9..144,600&family=Azeret+Mono:wght@400;500;700&family=Instrument+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
+  <canvas id="sky" aria-hidden="true"></canvas>
+  <div class="glow" id="glow" aria-hidden="true"></div>
+  <canvas id="embers" aria-hidden="true"></canvas>
+  <canvas id="sparks" aria-hidden="true"></canvas>
 
-<canvas id="sky" aria-hidden="true"></canvas>
-<div class="glow" aria-hidden="true"></div>
-<canvas id="embers" aria-hidden="true"></canvas>
-<canvas id="sparks" aria-hidden="true"></canvas>
+  <main id="scenes">
 
-<div class="wrap" lang="da">
-  <div class="eyebrow">Officiel meddelelse · Sag nr. <b id="case">22 18 26 ··</b></div>
-  <div class="status">Nummer: <span class="ok">fundet</span> · Gæt tilbage: <span class="ok">0</span> · Undskyldninger: <span class="bad">afvist</span></div>
+    <section class="scene active" data-scene="unlock" aria-label="Lås op">
+      <p class="eyebrow">Sag nr.</p>
+      <div class="digits" id="digits">
+        <span>22</span><span>18</span><span>26</span><span class="blank" id="blank"><b id="b1">_</b><b id="b2">_</b></span>
+      </div>
+      <p class="line" id="unlock-line">Du kender de sidste to.</p>
+      <div class="keypad" id="keypad" role="group" aria-label="Tastatur">
+        <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+        <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+        <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+        <button type="button" class="ghost" data-k="del" aria-label="Slet">⌫</button><button type="button" data-k="0">0</button><button type="button" class="ghost" aria-hidden="true" tabindex="-1"></button>
+      </div>
+    </section>
 
-  <h1>Du bliver bortført.<br>Til <span class="fire">bål.</span></h1>
-  <p class="lede">Du sagde selv, der kun var 100 muligheder. Jeg skulle bruge én. <b>Nu har jeg dit nummer</b>, og så er der ingen vej udenom.</p>
+    <section class="scene" data-scene="kidnap" aria-label="Bortførelse">
+      <h1 class="display">Du bliver<br>bortført.</h1>
+      <button class="btn big" id="where" type="button">Hvorhen?</button>
+      <h1 class="display fire hidden" id="where-answer">Til bål.</h1>
+      <button class="btn next hidden" data-next type="button">Videre</button>
+    </section>
 
-  <div class="notice">
-    <span class="stamp">Ingen vej udenom</span>
-    <dl>
-      <dt>Hvornår</dt><dd>Det får du ikke at vide.<small>Det er dét, bortførelse betyder.</small></dd>
-      <dt>Hvor</dt><dd>Et sted med himmel.<small>Og uden gadelys.</small></dd>
-      <dt>Dresscode</dt><dd>Noget, der gerne må lugte af røg.</dd>
-      <dt>Medbring</dt><dd>Ingenting.<small>Jeg har styr på det. Også det med håret. Se længere nede.</small></dd>
-    </dl>
-  </div>
+    <section class="scene" data-scene="fire" aria-label="Bålet">
+      <p class="line" id="fire-line">Tryk for at lægge brænde.</p>
+      <div class="firebox" id="firebox">
+        <canvas id="firecanvas"></canvas>
+        <div class="mallow hidden" id="mallow"><div class="stick"></div><div class="puff" id="puff"></div></div>
+      </div>
+      <div class="row" id="fire-actions">
+        <button class="btn hidden" id="light" type="button">Tænd</button>
+        <button class="btn hidden" id="roast" type="button">Hold for at riste</button>
+        <button class="btn next hidden" data-next type="button">Videre</button>
+      </div>
+    </section>
 
-  <section aria-labelledby="menu-h">
-    <h2 id="menu-h">Programmet</h2>
-    <ul class="menu">
-      <li>
-        <svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M18 4c1 6 7 8 7 15a7 7 0 0 1-14 0c0-3 1.5-5 3-6 0 3 1 4 2 4 0-5 1-9 2-13z" fill="#FF8A3D"/><path d="M18 18c.5 2.5 3 3.5 3 6a3 3 0 0 1-6 0c0-1.2.6-2 1.2-2.6 0 1.2.5 1.6.9 1.6 0-2 .4-3.5.9-5z" fill="#FFC46B"/></svg>
-        <div><div class="name">Bål</div><div class="desc">Et rigtigt et. Med gnister og det hele. Ikke sådan et lille et i en skål.</div></div>
-      </li>
-      <li>
-        <svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><ellipse cx="18" cy="19" rx="12" ry="8" fill="#B5473A"/><ellipse cx="18" cy="17" rx="12" ry="7" fill="#D9705F"/><ellipse cx="18" cy="16" rx="8" ry="4" fill="#F0A090"/><path d="M8 24c4 3 16 3 20 0" stroke="#7A2E24" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <div><div class="name">Roastbeef</div><div class="desc">Over åben ild. Rosa i midten. Ikke fra en pakke i køledisken.</div></div>
-      </li>
-      <li>
-        <svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M6 32 26 12" stroke="#C9C1B6" stroke-width="2" stroke-linecap="round"/><rect x="21" y="4" width="11" height="11" rx="3" transform="rotate(20 26.5 9.5)" fill="#F6EFE4"/><path d="M23 6c2 1 3 3 4 6" stroke="#FFC46B" stroke-width="2" stroke-linecap="round"/><path d="M30 5c1 2 1.5 3.5 1 6" stroke="#B5763A" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <div><div class="name">Skumfiduser</div><div class="desc">Ristede til de er lige præcis for brændte. Du får den første.</div></div>
-      </li>
-      <li>
-        <svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M18 4l3 8 8 1-6 6 2 9-7-4-7 4 2-9-6-6 8-1z" fill="#FFC46B"/><circle cx="6" cy="8" r="1.2" fill="#F6EFE4"/><circle cx="30" cy="28" r="1.4" fill="#F6EFE4"/><circle cx="31" cy="6" r="0.9" fill="#F6EFE4"/><circle cx="5" cy="30" r="0.9" fill="#F6EFE4"/></svg>
-        <div><div class="name">Stjerner</div><div class="desc">Gratis. Kommer frem, når det bliver mørkt nok. Vi bliver, til det sker.</div></div>
-      </li>
-    </ul>
-  </section>
+    <section class="scene" data-scene="stars" aria-label="Stjerner">
+      <p class="line" id="stars-line">Tryk på himlen.</p>
+      <div class="tapzone" id="tapzone" aria-label="Himlen"></div>
+      <button class="btn next hidden" data-next type="button">Videre</button>
+    </section>
 
-  <section class="hair" aria-labelledby="hair-h">
-    <h2 id="hair-h">Angående dit <span class="fire">hår</span></h2>
-    <p>Ja. Det kommer til at lugte af bål. <b>Det er ikke en fejl. Det er beviset på, at du var der.</b></p>
-    <p>Men fordi jeg ved, at det er dit eneste argument, har jeg lavet en plan:</p>
-    <ol class="plan">
-      <li><span class="n">01</span><span class="t">Jeg sidder på røgsiden. Hele aftenen.<small>Uanset hvor vinden vender. Jeg flytter mig.</small></span></li>
-      <li><span class="n">02</span><span class="t">Der er en hue med. Til dig.<small>Ikke til mig. Mit hår må gerne lugte.</small></span></li>
-      <li><span class="n">03</span><span class="t">Shampoo er købt. Den dyre.<small>Den står klar til bagefter.</small></span></li>
-      <li><span class="n">04</span><span class="t">Lugten er væk efter ét bad.<small>Aftenen er ikke.</small></span></li>
-    </ol>
-  </section>
+    <section class="scene" data-scene="hair" aria-label="Håret">
+      <p class="line" id="hair-line">Ja. Det kommer til at lugte.</p>
+      <div class="camp" id="camp">
+        <svg viewBox="0 0 400 220" aria-hidden="true">
+          <defs>
+            <linearGradient id="smokeg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#9A93A8" stop-opacity=".55"/><stop offset="1" stop-color="#9A93A8" stop-opacity="0"/></linearGradient>
+          </defs>
+          <ellipse cx="200" cy="196" rx="170" ry="10" fill="#131A2C"/>
+          <g id="smoke" class="smoke">
+            <path d="M200 150 C 210 120, 180 100, 200 70 C 215 45, 190 30, 200 5" stroke="url(#smokeg)" stroke-width="26" fill="none" stroke-linecap="round"/>
+          </g>
+          <g id="fire-svg"><path d="M200 165c6-26 30-34 30-64 0 12-8 20-14 24 2-16-6-30-16-40 4 18-12 26-12 46 0-8-6-12-8-18-10 14-10 32 4 44-8-4-14-10-14-20 0 24 12 36 30 36 18 0 30-12 30-36 0 16-10 24-30 28z" fill="#FF8A3D"/><path d="M200 165c4-14 16-18 16-34 0 6-4 10-7 12 1-8-3-15-9-20 2 9-6 13-6 23 0-4-3-6-4-9-5 7-5 16 2 22-4-2-7-5-7-10 0 12 6 18 15 18s15-6 15-18c0 8-5 12-15 16z" fill="#FFC46B"/></g>
+          <rect x="175" y="165" width="50" height="8" rx="3" fill="#4A3324"/>
+          <g id="her" class="person"><circle cx="90" cy="120" r="14" fill="#F6EFE4"/><path id="hairpath" d="M74 118c0-18 32-18 32 0v14c-6-8-26-8-32 0z" fill="#3B2A24"/><rect x="80" y="134" width="20" height="40" rx="8" fill="#B5473A"/><g id="hat" class="hidden"><path d="M72 116c0-12 36-12 36 0" fill="#FFC46B"/><rect x="70" y="112" width="40" height="7" rx="3" fill="#FFC46B"/></g></g>
+          <g id="me" class="person"><circle cx="310" cy="120" r="14" fill="#F6EFE4"/><path d="M296 118c0-14 28-14 28 0" fill="#3B2A24"/><rect x="300" y="134" width="20" height="40" rx="8" fill="#3E5A82"/></g>
+          <text id="me-label" x="310" y="192" text-anchor="middle" font-size="11" fill="#8C8798" font-family="Azeret Mono, monospace">mig</text>
+          <text x="90" y="192" text-anchor="middle" font-size="11" fill="#8C8798" font-family="Azeret Mono, monospace">dig</text>
+        </svg>
+      </div>
+      <div class="row">
+        <button class="btn" id="wind" type="button">Vend vinden</button>
+        <button class="btn" id="hatbtn" type="button">Hue på</button>
+        <button class="btn next hidden" data-next type="button">Videre</button>
+      </div>
+    </section>
 
-  <section class="rsvp" id="rsvp" aria-labelledby="rsvp-h">
-    <h2 id="rsvp-h">Kommer du?</h2>
-    <p class="q">Der er to knapper. Det er kun for syns skyld.</p>
-    <div class="buttons" id="buttons">
-      <button class="btn yes" id="yes" type="button">Ja, selvfølgelig</button>
-      <button class="btn no" id="no" type="button">Nej</button>
-    </div>
-    <div class="taunt" id="taunt" aria-live="polite"></div>
-    <div class="done">
-      <p class="big">Det tænkte jeg nok.</p>
-      <p>Du hører fra mig. Ikke hvornår. Bare at du gør.</p>
-      <p>Skumfiduserne er allerede købt. Der var aldrig rigtig et valg.</p>
-      <span class="stamp">Bekræftet</span>
-    </div>
-  </section>
+    <section class="scene" data-scene="rsvp" aria-label="Svar">
+      <h1 class="display">Kommer du?</h1>
+      <div class="buttons" id="buttons">
+        <button class="btn yes" id="yes" type="button">Ja</button>
+        <button class="btn no" id="no" type="button">Nej</button>
+      </div>
+      <p class="line" id="taunt" aria-live="polite"></p>
+      <div class="done hidden" id="done">
+        <h1 class="display fire">Det tænkte jeg nok.</h1>
+        <p class="line">Du hører fra mig. Ikke hvornår.</p>
+        <a class="btn hidden" id="reply" href="#">Sig det til ham</a>
+      </div>
+    </section>
 
-  <footer>Sag nr. <span id="case2">22 18 26 ··</span> · Nummer fundet · Ingen flere gæt nødvendige</footer>
-</div>
+  </main>
 
-<script>
-(function () {
-  "use strict";
-  const DEFAULT_ENDING = "";
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const $ = (id) => document.getElementById(id);
-
-  // Case number: prefix plus the ending she gave up.
-  const m = /^#(\d{2})$/.exec(location.hash);
-  const ending = m ? m[1] : DEFAULT_ENDING;
-  const shown = "22 18 26 " + (ending || "··");
-  $("case").textContent = shown; $("case2").textContent = shown;
-
-  // ---------- Sky: stars and the odd shooting star ----------
-  const sky = $("sky"), sctx = sky.getContext("2d");
-  let stars = [], shooting = null, W = 0, H = 0, dpr = 1;
-  function sizeAll() {
-    dpr = Math.min(2, window.devicePixelRatio || 1);
-    W = innerWidth; H = innerHeight;
-    for (const c of [sky, embersC, sparksC]) { c.width = W * dpr; c.height = H * dpr; c.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0); }
-    stars = Array.from({ length: Math.round(W * H / 6000) }, () => ({
-      x: Math.random() * W, y: Math.random() * H * 0.85, r: Math.random() * 1.3 + 0.3,
-      p: Math.random() * Math.PI * 2, s: 0.4 + Math.random() * 1.2, w: Math.random() < 0.12
-    }));
-    drawSky(0);
-  }
-  function drawSky(t) {
-    sctx.clearRect(0, 0, W, H);
-    for (const s of stars) {
-      const a = reduce ? 0.7 : 0.45 + 0.45 * Math.sin(s.p + t * 0.0012 * s.s);
-      sctx.globalAlpha = a; sctx.fillStyle = s.w ? "#FFE1B3" : "#F6EFE4";
-      sctx.beginPath(); sctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); sctx.fill();
-    }
-    sctx.globalAlpha = 1;
-    if (shooting) {
-      const sh = shooting; sh.x += sh.vx; sh.y += sh.vy; sh.life -= 0.02;
-      const g = sctx.createLinearGradient(sh.x, sh.y, sh.x - sh.vx * 12, sh.y - sh.vy * 12);
-      g.addColorStop(0, "rgba(255,244,228," + Math.max(0, sh.life) + ")"); g.addColorStop(1, "rgba(255,244,228,0)");
-      sctx.strokeStyle = g; sctx.lineWidth = 1.6; sctx.beginPath(); sctx.moveTo(sh.x, sh.y); sctx.lineTo(sh.x - sh.vx * 12, sh.y - sh.vy * 12); sctx.stroke();
-      if (sh.life <= 0 || sh.x > W + 50 || sh.y > H) shooting = null;
-    } else if (!reduce && Math.random() < 0.004) {
-      shooting = { x: Math.random() * W * 0.7, y: Math.random() * H * 0.3, vx: 7 + Math.random() * 4, vy: 3 + Math.random() * 2, life: 1 };
-    }
-  }
-
-  // ---------- Embers drifting up from the fire ----------
-  const embersC = $("embers"), ectx = embersC.getContext("2d");
-  const embers = [];
-  function spawnEmber() {
-    embers.push({ x: W * (0.3 + Math.random() * 0.4), y: H + 10, vx: (Math.random() - 0.5) * 0.6, vy: -(0.6 + Math.random() * 1.4), r: 1 + Math.random() * 2.2, life: 1, hue: Math.random() < 0.5 ? "#FF8A3D" : "#FFC46B" });
-  }
-  function drawEmbers() {
-    ectx.clearRect(0, 0, W, H);
-    if (embers.length < 60 && Math.random() < 0.5) spawnEmber();
-    for (let i = embers.length - 1; i >= 0; i--) {
-      const e = embers[i];
-      e.x += e.vx + Math.sin(e.y * 0.02) * 0.4; e.y += e.vy; e.life -= 0.0035;
-      if (e.life <= 0) { embers.splice(i, 1); continue; }
-      ectx.globalAlpha = Math.max(0, e.life) * 0.9; ectx.fillStyle = e.hue;
-      ectx.beginPath(); ectx.arc(e.x, e.y, e.r * (0.6 + e.life * 0.4), 0, Math.PI * 2); ectx.fill();
-    }
-    ectx.globalAlpha = 1;
-  }
-
-  // ---------- Sparks when she says yes ----------
-  const sparksC = $("sparks"), pctx = sparksC.getContext("2d");
-  let sparks = [];
-  function burst(x, y) {
-    const cols = ["#FFC46B", "#FF8A3D", "#F6EFE4", "#FFD9A8"];
-    for (let i = 0; i < 140; i++) {
-      const a = Math.random() * Math.PI * 2, v = 3 + Math.random() * 9;
-      sparks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 4, s: 2 + Math.random() * 3, c: cols[i % cols.length], life: 1 });
-    }
-  }
-  function drawSparks() {
-    if (!sparks.length) return;
-    pctx.clearRect(0, 0, W, H);
-    sparks = sparks.filter(p => p.life > 0);
-    for (const p of sparks) {
-      p.vy += 0.22; p.x += p.vx; p.y += p.vy; p.life -= 0.012;
-      pctx.globalAlpha = Math.max(0, p.life); pctx.fillStyle = p.c;
-      pctx.beginPath(); pctx.arc(p.x, p.y, p.s * p.life, 0, Math.PI * 2); pctx.fill();
-    }
-    pctx.globalAlpha = 1;
-    if (!sparks.length) pctx.clearRect(0, 0, W, H);
-  }
-
-  sizeAll();
-  window.addEventListener("resize", sizeAll);
-  if (!reduce) {
-    (function loop(t) { drawSky(t); drawEmbers(); drawSparks(); requestAnimationFrame(loop); })(0);
-  }
-
-  // ---------- The button she cannot press ----------
-  const no = $("no"), yes = $("yes"), buttons = $("buttons"), taunt = $("taunt"), rsvp = $("rsvp");
-  const lines = [
-    "Nej?",
-    "Er du sikker?",
-    "Håret klarer sig.",
-    "Der er skumfiduser.",
-    "Jeg tager shampoo med.",
-    "Den dyre shampoo.",
-    "Der er stjerner…",
-    "Du får den første skumfidus.",
-    "Okay. Ja."
-  ];
-  const taunts = [
-    "Den knap virker vist ikke helt.",
-    "Prøv igen. Eller lad være.",
-    "Jeg sagde jo, det kun var for syns skyld.",
-    "Den anden knap står stille. Bare så du ved det.",
-    "Du løber ikke fra et bål.",
-    "Hår kan vaskes. Det her kan ikke.",
-    "Stjernerne venter ikke for evigt. Det gør jeg dog.",
-    "Så tæt på. Bare tryk på den anden.",
-    "Nu er den også en ja-knap."
-  ];
-  let tries = 0;
-  function flee() {
-    tries++;
-    const i = Math.min(tries - 1, lines.length - 1);
-    no.textContent = lines[i];
-    taunt.textContent = taunts[i];
-    yes.style.setProperty("--grow", String(Math.min(1.7, 1 + tries * 0.08)));
-    if (tries >= lines.length) { no.classList.add("became-yes"); no.classList.remove("no"); no.style.position = ""; no.style.left = ""; no.style.top = ""; return; }
-    const area = buttons.getBoundingClientRect();
-    if (!no.classList.contains("fled")) { no.classList.add("fled"); }
-    const bw = no.offsetWidth, bh = no.offsetHeight;
-    const maxX = Math.max(0, area.width - bw), maxY = Math.max(0, area.height - bh);
-    let x, y, guard = 0;
-    do { x = Math.random() * maxX; y = Math.random() * maxY; guard++; }
-    while (guard < 20 && Math.abs(x - parseFloat(no.style.left || "0")) < 80 && Math.abs(y - parseFloat(no.style.top || "0")) < 40);
-    no.style.left = x + "px"; no.style.top = y + "px";
-    no.style.transform = "rotate(" + ((Math.random() - 0.5) * 14) + "deg)";
-  }
-  no.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && !no.classList.contains("became-yes")) flee(); });
-  no.addEventListener("pointerdown", (e) => { if (no.classList.contains("became-yes")) return; e.preventDefault(); flee(); });
-  no.addEventListener("click", (e) => { if (no.classList.contains("became-yes")) return confirm(e); e.preventDefault(); flee(); });
-  no.addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && !no.classList.contains("became-yes")) { e.preventDefault(); flee(); } });
-
-  function confirm(e) {
-    rsvp.classList.add("confirmed");
-    if (!reduce) {
-      const r = (e && e.currentTarget && e.currentTarget.getBoundingClientRect) ? e.currentTarget.getBoundingClientRect() : rsvp.getBoundingClientRect();
-      burst(r.left + r.width / 2, r.top + r.height / 2);
-      setTimeout(() => burst(W * 0.3, H * 0.4), 250);
-      setTimeout(() => burst(W * 0.7, H * 0.35), 500);
-    }
-    rsvp.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
-  }
-  yes.addEventListener("click", confirm);
-})();
-</script>
+  <nav class="dots" id="dots" aria-label="Fremskridt"></nav>
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>

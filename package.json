@@ -1,0 +1,18 @@
+{
+  "name": "baalbortfoerelsen",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "An interactive bonfire invitation. Starts with a phone number, ends with a button that cannot say no.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build:single": "vite build --config vite.single.config.js",
+    "test:cli": "python3 -m unittest discover -s cli/tests -v"
+  },
+  "devDependencies": {
+    "vite": "^5.4.21",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}

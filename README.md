@@ -1,51 +1,48 @@
-# Phone number guesser
+# Bålbortførelsen
 
-A static web page and a Python CLI. Both expand a phone number with missing digits into every candidate it could be,
-and optionally classifies each candidate against a public numbering plan.
+An interactive invitation, in Danish, to a bonfire with roast beef,
+marshmallows and stars. It started as a phone number with two digits missing
+and a dare to guess them. Now that the number is found, the page kidnaps her.
 
-```
-python3 phone_guesser.py 221826**
-python3 phone_guesser.py 221826** --plan dk
-python3 phone_guesser.py "+45 2218 26**" --plan dk --only mobile --format csv
-python3 phone_guesser.py "**182600" --plan dk --summary
-```
+Six scenes, one line of text each:
 
-Unknown digits can be written as `*`, `?`, `x`, `_` or `#`. Spaces, dashes and
-a leading `+45` / `0045` are ignored when a plan is selected.
+1. **Lås op.** A keypad. She types the last two digits of her own number.
+2. **Bortført.** "Du bliver bortført." Press "Hvorhen?" to find out where.
+3. **Bålet.** Tap to stack logs, light the fire, hang the roast beef, then
+   hold a button to roast a marshmallow. Release at "lige præcis for brændt".
+4. **Stjerner.** Tap the sky for shooting stars. Make a wish.
+5. **Håret.** Flip the wind. Whichever way the smoke goes, he moves into it.
+   There is a hat for her.
+6. **Kommer du?** The "Nej" button runs away and eventually becomes a "Ja".
 
-## Website
-
-`index.html` is the surprise that came after the guessing game: an invitation,
-in Danish, to a bonfire with roast beef, marshmallows and stars, framed as an
-official kidnapping notice. The "Nej" button runs away and eventually turns
-into a "Ja". The case number shows the phone prefix with the last two digits
-masked; open the page with the ending in the URL hash, for example
-`index.html#00`, to fill it in. No build step, no dependencies, works locally
-or on GitHub Pages.
-
-## What it does and does not do
-
-- Enumerates candidates locally. No network access, no lookups.
-- With `--plan dk`, labels each candidate by its Danish number series:
-  `mobile`, `fixed`, `mixed`, `m2m`, `special:<kind>`, `spare`. This lets you
-  drop candidates that cannot be a subscriber number (premium rate, freephone,
-  short codes, spare series) or keep only mobiles.
-- Refuses masks that expand to more than 10,000 candidates unless `--all` is
-  given.
-- It cannot tell you which candidate belongs to a specific person. That would
-  require probing carrier or messaging services, which this tool does not do.
-
-## Numbering plan data
-
-The Danish table follows the overall Danish numbering plan as summarised on
-[Wikipedia](https://en.wikipedia.org/wiki/Telephone_numbers_in_Denmark) and
-published by the [Danish authorities](https://en.digst.dk/telecom/telecom/numbering/).
-Some fixed series contain block-level mobile exceptions; those two-digit
-prefixes are marked `mixed`. Add another country by building a `Plan` in
-`phone_guesser.py` and registering it in `PLANS`.
-
-## Tests
+## Run it
 
 ```
-python3 -m unittest discover -s tests -v
+npm install
+npm run dev
 ```
+
+Copy `.env.example` to `.env.local` and set `VITE_ENDING` to the last two
+digits. Without it, any two digits unlock the page. `VITE_REPLY_TO` is an
+optional phone number for a "text him back" button on the last scene.
+
+## Deploy on Vercel
+
+1. Import the GitHub repo in Vercel. It detects Vite and uses `npm run build`
+   with `dist` as the output directory. No other settings are needed.
+2. Under Environment Variables, add `VITE_ENDING` with the two digits, and
+   optionally `VITE_REPLY_TO`.
+3. Deploy. The number is baked in at build time and never lives in the repo.
+
+The ending can also be passed in the URL hash, for example `/#00`, which wins
+over the environment variable.
+
+## Project layout
+
+- `index.html`, `src/` are the Vite app. `main.js` holds the scene logic,
+  `sky.js` the star, ember and spark canvases, `fire.js` the bonfire.
+- `npm run build:single` produces `dist-single/index.html`, a one-file build
+  for sharing without a server.
+- `cli/phone_guesser.py` is the original command-line tool that expands a
+  masked number into candidates and classifies them against the Danish
+  numbering plan. `npm run test:cli` runs its tests.
