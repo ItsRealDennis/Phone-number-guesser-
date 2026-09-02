@@ -16,6 +16,9 @@ gnisterne bevæger sig, og første/sidste frame er ens, så `loop` er sømløs.
 | `close-16x9.{jpg,webp}` | 1920×1080 | Nærbillede af brænde og gløder — passer til scene 3 når bålet er tændt |
 | `close-16x9.{mp4,webm}` | 1280×720 · 5 s · lydløs | Samme motiv som loop |
 | `og.jpg` | 1200×630 | Delebillede (Open Graph / Twitter) |
+| `stars-9x16.webp` | 941×1672 | Scene 4. Mælkevej og stjerneskud med plads til teksten |
+| `hair-9x16.webp` | 941×1672 | Scene 5. To anonyme personer, bål og røg ved kysten |
+| `embers-9x16.webp` | 941×1672 | Scene 6. Gløder og gnister under RSVP'en |
 
 ## Sådan bruges de
 
@@ -65,3 +68,6 @@ job-id'er, hvis de skal hentes igen eller laves om:
 - `meadow-9x16` — nano_banana_pro `5a08460b-cc57-4a97-bdfe-f19f41e7f672`; loop Kling 3.0 `c599bedd-e195-4bf8-ad24-7869e2879627`
 - `meadow-alt-9x16` — seedream_v4_5 `cd5b6ea9-4266-488a-831e-66fef566b547`
 - `close-16x9` — cinematic_studio_2_5 `d9fcce31-bb6d-4bde-a730-4718285353f8`; loop Kling 3.0 `a42edcb6-45e5-4a99-9ba8-ff56aaa3df52`
+
+`stars-9x16.webp`, `hair-9x16.webp` og `embers-9x16.webp` er genereret
+med OpenAI ImageGen til de resterende scener og optimeret som WebP.

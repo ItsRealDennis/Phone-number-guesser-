@@ -6,6 +6,11 @@
   <title>Bålbortførelsen</title>
   <meta name="description" content="Du bliver bortført. Til bål.">
   <meta name="theme-color" content="#0A0E1A">
+  <meta property="og:title" content="Bålbortførelsen">
+  <meta property="og:description" content="Du bliver bortført. Til bål.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="%VITE_SITE_URL%/bg/og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400;1,9..144,600&family=Azeret+Mono:wght@400;500;700&family=Instrument+Sans:wght@400;500;600&display=swap">
@@ -33,14 +38,26 @@
       </div>
     </section>
 
-    <section class="scene" data-scene="kidnap" aria-label="Bortførelse">
+    <section class="scene has-media" data-scene="kidnap" aria-label="Bortførelse">
+      <video class="scene-media portrait" autoplay muted loop playsinline preload="metadata" poster="/bg/meadow-9x16.jpg" aria-hidden="true" tabindex="-1">
+        <source src="/bg/meadow-9x16.webm" type="video/webm">
+        <source src="/bg/meadow-9x16.mp4" type="video/mp4">
+      </video>
+      <video class="scene-media landscape" autoplay muted loop playsinline preload="metadata" poster="/bg/meadow-16x9.jpg" aria-hidden="true" tabindex="-1">
+        <source src="/bg/meadow-16x9.webm" type="video/webm">
+        <source src="/bg/meadow-16x9.mp4" type="video/mp4">
+      </video>
       <h1 class="display">Du bliver<br>bortført.</h1>
       <button class="btn big" id="where" type="button">Hvorhen?</button>
       <h1 class="display fire hidden" id="where-answer">Til bål.</h1>
       <button class="btn next hidden" data-next type="button">Videre</button>
     </section>
 
-    <section class="scene" data-scene="fire" aria-label="Bålet">
+    <section class="scene has-media" data-scene="fire" aria-label="Bålet">
+      <video class="scene-media" autoplay muted loop playsinline preload="metadata" poster="/bg/close-16x9.jpg" aria-hidden="true" tabindex="-1">
+        <source src="/bg/close-16x9.webm" type="video/webm">
+        <source src="/bg/close-16x9.mp4" type="video/mp4">
+      </video>
       <p class="line" id="fire-line">Tryk for at lægge brænde.</p>
       <div class="firebox" id="firebox">
         <canvas id="firecanvas"></canvas>

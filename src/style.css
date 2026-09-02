@@ -30,8 +30,29 @@ main { position: relative; z-index: 2; height: 100%; }
 .scene {
   position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center;
   gap: 22px; padding: 24px 24px 72px; text-align: center; max-width: 720px; margin: 0 auto;
+  isolation: isolate;
 }
 .scene.active { display: flex; }
+.scene::before, .scene.has-media::after {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+}
+.scene.has-media::after {
+  background: linear-gradient(180deg, rgba(10,14,26,.32), rgba(10,14,26,.52) 55%, rgba(10,14,26,.74));
+}
+.scene-media {
+  position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2;
+  pointer-events: none; opacity: .86; filter: saturate(.88) contrast(1.04);
+}
+.scene-media.landscape { display: none; }
+.scene[data-scene="stars"]::before {
+  background: linear-gradient(rgba(10,14,26,.28), rgba(10,14,26,.48)), url("/bg/stars-9x16.webp") center / cover no-repeat;
+}
+.scene[data-scene="hair"]::before {
+  background: linear-gradient(rgba(10,14,26,.38), rgba(10,14,26,.68)), url("/bg/hair-9x16.webp") center / cover no-repeat;
+}
+.scene[data-scene="rsvp"]::before {
+  background: linear-gradient(rgba(10,14,26,.22), rgba(10,14,26,.6)), url("/bg/embers-9x16.webp") center / cover no-repeat;
+}
 
 .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); margin: 0; }
 .line { font-family: var(--font-display); font-style: italic; font-size: clamp(20px, 3vw, 26px); color: var(--ink-2); margin: 0; min-height: 1.4em; text-wrap: balance; }
@@ -85,7 +106,7 @@ main { position: relative; z-index: 2; height: 100%; }
 .tapzone { position: fixed; inset: 0; z-index: 3; cursor: crosshair; }
 .scene[data-scene="stars"] .line, .scene[data-scene="stars"] .btn { position: relative; z-index: 4; }
 
-.camp { width: min(92vw, 520px); }
+.camp { width: min(92vw, 520px); padding: 8px; border-radius: 22px; background: rgba(10,14,26,.46); backdrop-filter: blur(5px); }
 .camp svg { width: 100%; height: auto; display: block; }
 .smoke { transform-origin: 200px 160px; transform: skewX(-22deg); transition: transform 900ms ease; }
 .smoke.left { transform: skewX(22deg); }
@@ -96,6 +117,21 @@ main { position: relative; z-index: 2; height: 100%; }
 @media (prefers-reduced-motion: no-preference) {
   .smoke path { animation: waft 3s ease-in-out infinite alternate; }
   @keyframes waft { from { transform: translateX(-3px); } to { transform: translateX(3px); } }
+}
+
+@media (orientation: landscape) {
+  .scene-media.portrait { display: none; }
+  .scene-media.landscape { display: block; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-media { display: none; }
+  .scene[data-scene="kidnap"]::before {
+    background: linear-gradient(rgba(10,14,26,.3), rgba(10,14,26,.62)), url("/bg/meadow-9x16.webp") center / cover no-repeat;
+  }
+  .scene[data-scene="fire"]::before {
+    background: linear-gradient(rgba(10,14,26,.38), rgba(10,14,26,.72)), url("/bg/close-16x9.webp") center / cover no-repeat;
+  }
 }
 
 .buttons { position: relative; display: flex; gap: 16px; align-items: center; justify-content: center; width: min(92vw, 520px); height: 200px; border-radius: 16px; border: 1px dashed var(--line); }
