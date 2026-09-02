@@ -1,6 +1,6 @@
 # Phone number guesser
 
-Expands a phone number with missing digits into every candidate it could be,
+A static web page and a Python CLI. Both expand a phone number with missing digits into every candidate it could be,
 and optionally classifies each candidate against a public numbering plan.
 
 ```
@@ -12,6 +12,12 @@ python3 phone_guesser.py "**182600" --plan dk --summary
 
 Unknown digits can be written as `*`, `?`, `x`, `_` or `#`. Spaces, dashes and
 a leading `+45` / `0045` are ignored when a plan is selected.
+
+## Website
+
+Open `index.html` in a browser, or serve the repo with GitHub Pages. It runs
+entirely client-side: type a mask, pick a numbering plan, toggle categories,
+and copy the result as a list or CSV. No build step and no dependencies.
 
 ## What it does and does not do
 

@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone Number Guesser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #F5F7FA;
+    --panel: #FFFFFF;
+    --ink: #161B22;
+    --ink-2: #4A5261;
+    --ink-3: #7B8494;
+    --line: #D9DEE6;
+    --line-2: #EAEEF3;
+    --accent: #137C74;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #DDF1EE;
+    --focus: #137C74;
+    --danger: #A3372E;
+    --danger-soft: #F9E6E3;
+    --c-mobile: #137C74;      --c-mobile-soft: #DDF1EE;
+    --c-fixed: #3E5A82;       --c-fixed-soft: #E3EAF5;
+    --c-mixed: #A6690F;       --c-mixed-soft: #F8EBD3;
+    --c-m2m: #4D7A2B;         --c-m2m-soft: #E5F0DA;
+    --c-special: #6B5B80;     --c-special-soft: #ECE6F3;
+    --c-spare: #7A756E;       --c-spare-soft: #ECEAE6;
+    --c-unallocated: #A3372E; --c-unallocated-soft: #F9E6E3;
+    --c-unknown: #7B8494;     --c-unknown-soft: #EAEEF3;
+    --radius: 6px;
+    --font-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12161C; --panel: #1A2029; --ink: #EAEEF3; --ink-2: #B4BCC8; --ink-3: #7F889A;
+      --line: #2C3441; --line-2: #222A35;
+      --accent: #3FB8AC; --accent-ink: #0E1A18; --accent-soft: #163632; --focus: #3FB8AC;
+      --danger: #E07A6F; --danger-soft: #3B2320;
+      --c-mobile: #3FB8AC;      --c-mobile-soft: #163632;
+      --c-fixed: #8FAEDB;       --c-fixed-soft: #1F2C40;
+      --c-mixed: #E0A94A;       --c-mixed-soft: #3B2E14;
+      --c-m2m: #97C46B;         --c-m2m-soft: #243418;
+      --c-special: #B6A4D2;     --c-special-soft: #2C2538;
+      --c-spare: #A9A29A;       --c-spare-soft: #2A2825;
+      --c-unallocated: #E07A6F; --c-unallocated-soft: #3B2320;
+      --c-unknown: #8F98A8;     --c-unknown-soft: #242B36;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12161C; --panel: #1A2029; --ink: #EAEEF3; --ink-2: #B4BCC8; --ink-3: #7F889A;
+    --line: #2C3441; --line-2: #222A35;
+    --accent: #3FB8AC; --accent-ink: #0E1A18; --accent-soft: #163632; --focus: #3FB8AC;
+    --danger: #E07A6F; --danger-soft: #3B2320;
+    --c-mobile: #3FB8AC;      --c-mobile-soft: #163632;
+    --c-fixed: #8FAEDB;       --c-fixed-soft: #1F2C40;
+    --c-mixed: #E0A94A;       --c-mixed-soft: #3B2E14;
+    --c-m2m: #97C46B;         --c-m2m-soft: #243418;
+    --c-special: #B6A4D2;     --c-special-soft: #2C2538;
+    --c-spare: #A9A29A;       --c-spare-soft: #2A2825;
+    --c-unallocated: #E07A6F; --c-unallocated-soft: #3B2320;
+    --c-unknown: #8F98A8;     --c-unknown-soft: #242B36;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 24px; margin-bottom: 24px; }
+  h1 {
+    font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1.1;
+    margin: 0; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  header p { margin: 0; color: var(--ink-2); max-width: 62ch; }
+
+  .layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 24px; align-items: start; }
+  @media (max-width: 820px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+  .controls { padding: 20px; display: flex; flex-direction: column; gap: 18px; position: sticky; top: 16px; }
+  @media (max-width: 820px) { .controls { position: static; } }
+
+  label.field { display: flex; flex-direction: column; gap: 6px; }
+  .label { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+  input[type="text"], select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 10px 12px; width: 100%;
+  }
+  input#mask { font-family: var(--font-mono); font-size: 20px; letter-spacing: 0.08em; padding: 12px; }
+  input:focus-visible, select:focus-visible, button:focus-visible {
+    outline: 2px solid var(--focus); outline-offset: 2px;
+  }
+  .hint { font-size: 13px; color: var(--ink-3); margin: 0; }
+  .hint code { font-family: var(--font-mono); font-size: 12px; background: var(--line-2); padding: 1px 5px; border-radius: 3px; }
+
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink-2);
+  }
+  .chip[aria-pressed="true"] { background: var(--soft, var(--accent-soft)); border-color: transparent; color: var(--col, var(--accent)); }
+  .chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--col, var(--ink-3)); }
+  .chip .n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: inherit; opacity: 0.8; }
+  .chip:disabled { opacity: 0.45; cursor: default; }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  button.btn {
+    font: inherit; font-weight: 600; font-size: 14px; cursor: pointer;
+    padding: 9px 14px; border-radius: var(--radius);
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  }
+  button.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  button.btn:hover { border-color: var(--ink-3); }
+  button.btn.primary:hover { filter: brightness(1.06); }
+  .toast { font-size: 13px; color: var(--accent); min-height: 1.4em; }
+
+  .results { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 20px; padding: 14px 20px; }
+  .summary .big { font-family: var(--font-display); font-size: 34px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .summary .of { color: var(--ink-2); }
+  .summary .mask-echo { font-family: var(--font-mono); letter-spacing: 0.06em; }
+  .summary .counts { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500;
+    padding: 2px 8px; border-radius: 999px; background: var(--soft); color: var(--col);
+    white-space: nowrap;
+  }
+  .tag .n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+  .error { padding: 14px 20px; background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+  .error strong { font-weight: 600; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 1px; background: var(--line-2); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  }
+  .cell {
+    background: var(--panel); padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    border-left: 3px solid var(--col, var(--line));
+  }
+  .cell .num { font-family: var(--font-mono); font-size: 15px; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; white-space: nowrap; }
+  .cell .num b { font-weight: 500; color: var(--accent); }
+  .cell .cat { font-size: 11px; color: var(--col, var(--ink-3)); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+  .cell.unknown { border-left-color: var(--line); }
+  .cell.unknown .cat { display: none; }
+  .more { padding: 12px 20px; color: var(--ink-2); font-size: 14px; }
+
+  details.plan { padding: 14px 20px; }
+  details.plan summary { cursor: pointer; font-weight: 600; }
+  details.plan p { color: var(--ink-2); max-width: 70ch; }
+  .plan-table { overflow-x: auto; margin-top: 10px; }
+  table { border-collapse: collapse; font-size: 13px; width: 100%; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+  th { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+  td.series { font-family: var(--font-mono); white-space: nowrap; }
+  footer { margin-top: 28px; font-size: 13px; color: var(--ink-3); max-width: 72ch; }
+  footer a { color: var(--ink-2); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cell { transition: background 120ms ease; }
+    .cell:hover { background: var(--line-2); }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Phone Number Guesser</h1>
+    <p>Type a number with the missing digits as <code>*</code>. Every candidate is listed and, with a numbering plan selected, labelled by the series it falls in.</p>
+  </header>
+
+  <div class="layout">
+    <aside class="panel controls" aria-label="Controls">
+      <label class="field">
+        <span class="label">Number with unknown digits</span>
+        <input id="mask" type="text" value="221826**" spellcheck="false" autocomplete="off" inputmode="text" aria-describedby="maskhint">
+        <p class="hint" id="maskhint">Unknown digits: <code>*</code> <code>?</code> <code>x</code> <code>_</code> <code>#</code>. Spaces, dashes and a leading +45 are ignored.</p>
+      </label>
+
+      <label class="field">
+        <span class="label">Numbering plan</span>
+        <select id="plan">
+          <option value="">None, just list the candidates</option>
+          <option value="dk" selected>Denmark (8 digits, +45)</option>
+        </select>
+      </label>
+
+      <div class="field">
+        <span class="label">Show categories</span>
+        <div class="filters" id="filters" role="group" aria-label="Category filters"></div>
+        <p class="hint">Click a category to hide or show it.</p>
+      </div>
+
+      <div class="field">
+        <span class="label">Export</span>
+        <div class="actions">
+          <button class="btn primary" id="copy-list" type="button">Copy list</button>
+          <button class="btn" id="copy-csv" type="button">Copy CSV</button>
+        </div>
+        <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      </div>
+    </aside>
+
+    <main class="results">
+      <div class="panel summary" id="summary"></div>
+      <div class="panel error" id="error" hidden></div>
+      <div class="grid" id="grid" aria-live="polite"></div>
+      <div class="panel more" id="more" hidden></div>
+
+      <details class="panel plan" id="plan-details">
+        <summary>How the Danish series are classified</summary>
+        <p>Denmark uses a closed 8-digit plan with no area codes. The first two digits decide the series. The table below follows the overall numbering plan as summarised on Wikipedia and published by the Danish authorities. Some fixed series carry block-level mobile exceptions and are marked mixed.</p>
+        <div class="plan-table"><table id="plan-table"></table></div>
+      </details>
+    </main>
+  </div>
+
+  <footer>
+    Everything runs in your browser. Nothing is looked up against carriers or messaging services, so the page can tell you which candidates are possible subscriber numbers, not which one belongs to a given person.
+    Plan sources: <a href="https://en.wikipedia.org/wiki/Telephone_numbers_in_Denmark">Telephone numbers in Denmark</a>, <a href="https://en.digst.dk/telecom/telecom/numbering/">Danish numbering (digst.dk)</a>.
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  const WILDCARDS = new Set(["*", "?", "x", "X", "_", "#"]);
+  const LIMIT = 10000;
+  const RENDER_CAP = 2000;
+
+  function fill(t, lo, hi, cat) { for (let p = lo; p <= hi; p++) t[String(p).padStart(2, "0")] = cat; }
+  function buildDk() {
+    const t = {};
+    fill(t, 10, 10, "special:carrier-preselect");
+    fill(t, 11, 12, "special:short-number");
+    fill(t, 13, 15, "spare");
+    fill(t, 16, 16, "special:network-access");
+    fill(t, 17, 17, "spare");
+    fill(t, 18, 18, "special:short-number");
+    fill(t, 19, 19, "spare");
+    fill(t, 20, 31, "mobile");
+    fill(t, 32, 36, "fixed");
+    fill(t, 37, 37, "m2m");
+    fill(t, 38, 39, "fixed");
+    fill(t, 40, 42, "mobile");
+    fill(t, 43, 49, "mixed");
+    fill(t, 50, 53, "mobile");
+    fill(t, 54, 55, "mixed");
+    fill(t, 56, 59, "fixed");
+    fill(t, 60, 61, "mobile");
+    fill(t, 62, 66, "fixed");
+    fill(t, 67, 68, "spare");
+    fill(t, 69, 69, "fixed");
+    fill(t, 70, 70, "special:split-charge");
+    fill(t, 71, 71, "mobile");
+    fill(t, 72, 79, "fixed");
+    fill(t, 80, 80, "special:freephone");
+    fill(t, 81, 81, "mobile");
+    fill(t, 82, 82, "fixed");
+    fill(t, 83, 85, "spare");
+    fill(t, 86, 89, "fixed");
+    fill(t, 90, 90, "special:premium-rate");
+    fill(t, 91, 93, "mobile");
+    fill(t, 94, 95, "spare");
+    fill(t, 96, 99, "fixed");
+    return { code: "dk", name: "Denmark", cc: "45", length: 8, ranges: t,
+      classify(n) { return n.length !== this.length ? "invalid-length" : (this.ranges[n.slice(0, 2)] || "unallocated"); } };
+  }
+  const PLANS = { dk: buildDk() };
+  const CATEGORIES = ["mobile", "fixed", "mixed", "m2m", "special", "spare", "unallocated"];
+  const LABELS = { mobile: "Mobile", fixed: "Fixed line", mixed: "Mixed", m2m: "Machine to machine", special: "Special service", spare: "Spare series", unallocated: "Unallocated", unknown: "" };
+
+  function normalise(raw, plan) {
+    const s0 = raw.trim();
+    const hadPlus = s0.startsWith("+");
+    let s = "";
+    for (const ch of s0) if ((ch >= "0" && ch <= "9") || WILDCARDS.has(ch)) s += ch;
+    if (!s) throw new Error("Enter at least one digit or wildcard.");
+    if (plan) {
+      const cc = plan.cc;
+      if (hadPlus && s.startsWith(cc) && s.length - cc.length === plan.length) s = s.slice(cc.length);
+      else if (s.startsWith("00" + cc) && s.length - cc.length - 2 === plan.length) s = s.slice(cc.length + 2);
+    }
+    let out = "";
+    for (const ch of s) out += WILDCARDS.has(ch) ? "*" : ch;
+    return out;
+  }
+  function countCandidates(mask) { return Math.pow(10, (mask.match(/\*/g) || []).length); }
+  function expand(mask) {
+    const slots = [];
+    for (let i = 0; i < mask.length; i++) if (mask[i] === "*") slots.push(i);
+    const total = Math.pow(10, slots.length);
+    const chars = mask.split("");
+    const out = new Array(total);
+    for (let k = 0; k < total; k++) {
+      let v = k;
+      for (let j = slots.length - 1; j >= 0; j--) { chars[slots[j]] = String(v % 10); v = Math.floor(v / 10); }
+      out[k] = chars.join("");
+    }
+    return out;
+  }
+  function pretty(n) { return n.length === 8 ? n.replace(/(\d{2})(?=\d)/g, "$1 ") : n; }
+  function base(cat) { return cat.split(":")[0]; }
+
+  const $ = (id) => document.getElementById(id);
+  const maskEl = $("mask"), planEl = $("plan"), filtersEl = $("filters"), summaryEl = $("summary"),
+        errorEl = $("error"), gridEl = $("grid"), moreEl = $("more"), toastEl = $("toast");
+  const hidden = new Set();
+  let current = { mask: "", rows: [], visible: [] };
+
+  function renderPlanTable() {
+    const plan = PLANS.dk, groups = [];
+    for (let p = 10; p <= 99; p++) {
+      const k = String(p).padStart(2, "0"), cat = plan.ranges[k];
+      const last = groups[groups.length - 1];
+      if (last && last.cat === cat && last.hi === p - 1) last.hi = p; else groups.push({ lo: p, hi: p, cat });
+    }
+    const rows = groups.map(g => {
+      const series = g.lo === g.hi ? `${g.lo}` : `${g.lo} to ${g.hi}`;
+      const b = base(g.cat), sub = g.cat.includes(":") ? g.cat.split(":")[1].replace(/-/g, " ") : "";
+      return `<tr><td class="series">${series}</td><td><span class="tag" style="--col:var(--c-${b});--soft:var(--c-${b}-soft)">${LABELS[b]}</span></td><td>${sub}</td></tr>`;
+    }).join("");
+    $("plan-table").innerHTML = `<thead><tr><th>Leading digits</th><th>Category</th><th>Detail</th></tr></thead><tbody>${rows}</tbody>`;
+  }
+
+  function compute() {
+    const plan = PLANS[planEl.value] || null;
+    errorEl.hidden = true;
+    let mask;
+    try { mask = normalise(maskEl.value, plan); }
+    catch (e) { return fail(e.message); }
+    if (plan && mask.length !== plan.length) return fail(`${plan.name} numbers are ${plan.length} digits. This mask has ${mask.length}.`);
+    const total = countCandidates(mask);
+    if (total > LIMIT) return fail(`This mask expands to ${total.toLocaleString()} candidates. Fill in more digits so it stays under ${LIMIT.toLocaleString()}.`);
+    const rows = expand(mask).map(n => ({ n, cat: plan ? plan.classify(n) : "unknown" }));
+    current = { mask, rows, plan };
+    render();
+  }
+  function fail(msg) {
+    errorEl.innerHTML = `<strong>Nothing to list.</strong> ${msg}`;
+    errorEl.hidden = false;
+    current = { mask: "", rows: [], plan: null, visible: [] };
+    summaryEl.innerHTML = `<span class="big">0</span><span class="of">candidates</span>`;
+    gridEl.innerHTML = ""; moreEl.hidden = true; renderFilters({});
+  }
+
+  function render() {
+    const { mask, rows, plan } = current;
+    const counts = {};
+    for (const r of rows) { const b = base(r.cat); counts[b] = (counts[b] || 0) + 1; }
+    const visible = rows.filter(r => !hidden.has(base(r.cat)));
+    current.visible = visible;
+
+    const countTags = plan ? CATEGORIES.filter(c => counts[c]).map(c =>
+      `<span class="tag" style="--col:var(--c-${c});--soft:var(--c-${c}-soft)">${LABELS[c]} <span class="n">${counts[c]}</span></span>`).join("") : "";
+    summaryEl.innerHTML =
+      `<span class="big">${visible.length.toLocaleString()}</span>` +
+      `<span class="of">${visible.length === rows.length ? "candidates for" : `of ${rows.length.toLocaleString()} shown for`} <span class="mask-echo">${pretty(mask)}</span></span>` +
+      (countTags ? `<span class="counts">${countTags}</span>` : "");
+
+    renderFilters(plan ? counts : {});
+
+    const cap = Math.min(visible.length, RENDER_CAP);
+    const parts = new Array(cap);
+    for (let i = 0; i < cap; i++) {
+      const r = visible[i], b = base(r.cat);
+      const num = highlight(r.n, mask);
+      parts[i] = plan
+        ? `<div class="cell" style="--col:var(--c-${b})"><span class="num">${num}</span><span class="cat">${r.cat.replace(/-/g, " ")}</span></div>`
+        : `<div class="cell unknown"><span class="num">${num}</span></div>`;
+    }
+    gridEl.innerHTML = parts.join("");
+    if (visible.length > cap) {
+      moreEl.textContent = `Showing the first ${cap.toLocaleString()} of ${visible.length.toLocaleString()}. Copy list or Copy CSV includes all of them.`;
+      moreEl.hidden = false;
+    } else moreEl.hidden = true;
+  }
+  function highlight(n, mask) {
+    let out = "";
+    for (let i = 0; i < n.length; i++) {
+      if (n.length === 8 && i > 0 && i % 2 === 0) out += " ";
+      out += mask[i] === "*" ? `<b>${n[i]}</b>` : n[i];
+    }
+    return out;
+  }
+  function renderFilters(counts) {
+    const cats = CATEGORIES.filter(c => counts[c]);
+    if (!cats.length) { filtersEl.innerHTML = `<span class="hint">Select a numbering plan to filter by category.</span>`; return; }
+    filtersEl.innerHTML = cats.map(c =>
+      `<button type="button" class="chip" data-cat="${c}" aria-pressed="${hidden.has(c) ? "false" : "true"}" style="--col:var(--c-${c});--soft:var(--c-${c}-soft)"><span class="dot"></span>${LABELS[c]} <span class="n">${counts[c]}</span></button>`).join("");
+  }
+  filtersEl.addEventListener("click", (e) => {
+    const btn = e.target.closest(".chip"); if (!btn) return;
+    const c = btn.dataset.cat;
+    if (hidden.has(c)) hidden.delete(c); else hidden.add(c);
+    render();
+  });
+
+  function toast(msg) { toastEl.textContent = msg; clearTimeout(toast.t); toast.t = setTimeout(() => { toastEl.textContent = ""; }, 2200); }
+  async function copy(text, label) {
+    try { await navigator.clipboard.writeText(text); toast(`Copied ${label}.`); }
+    catch (_) {
+      const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); toast(`Copied ${label}.`); } catch (e2) { toast("Copy failed. Select the numbers and copy them by hand."); }
+      ta.remove();
+    }
+  }
+  $("copy-list").addEventListener("click", () => copy(current.visible.map(r => r.n).join("\n"), `${current.visible.length} numbers`));
+  $("copy-csv").addEventListener("click", () => copy("number,category\n" + current.visible.map(r => `${r.n},${r.cat}`).join("\n"), `${current.visible.length} rows as CSV`));
+
+  let timer;
+  maskEl.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(compute, 120); });
+  planEl.addEventListener("change", () => { hidden.clear(); $("plan-details").hidden = planEl.value !== "dk"; compute(); });
+
+  renderPlanTable();
+  compute();
+})();
+</script>
+</body>
+</html>
