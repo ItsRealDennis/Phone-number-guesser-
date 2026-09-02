@@ -25,14 +25,13 @@ npm run dev
 Copy `.env.example` to `.env.local` and set `VITE_ENDING` to the last two
 digits. Without it, any two digits unlock the page. `VITE_REPLY_TO` is an
 optional phone number for a "text him back" button on the last scene.
-`VITE_SITE_URL` is the deployed origin used for the absolute share image URL.
 
 ## Deploy on Vercel
 
 1. Import the GitHub repo in Vercel. It detects Vite and uses `npm run build`
    with `dist` as the output directory. No other settings are needed.
 2. Under Environment Variables, add `VITE_ENDING` with the two digits, and
-   optionally `VITE_REPLY_TO`. Set `VITE_SITE_URL` to the production origin.
+   optionally `VITE_REPLY_TO`.
 3. Deploy. The number is baked in at build time and never lives in the repo.
 
 The ending can also be passed in the URL hash, for example `/#00`, which wins
