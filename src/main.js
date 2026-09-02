@@ -82,13 +82,14 @@ go(0);
   });
   light.addEventListener("click", () => {
     lit = true; fire.light(); light.classList.add("hidden");
-    line.textContent = "Sådan. Roastbeef?";
+    firebox.classList.remove("ready");
+    line.textContent = "Tryk på bålet for at sætte roastbeef over.";
     canvas.style.cursor = "pointer";
     stage = 1;
   });
   canvas.addEventListener("click", () => {
     if (stage !== 1) return;
-    fire.setRoast(true); stage = 2;
+    fire.setRoast(true); firebox.classList.add("ready"); stage = 2;
     line.textContent = "Nu skumfidusen. Hold knappen.";
     roast.classList.remove("hidden"); mallow.classList.remove("hidden");
   });
