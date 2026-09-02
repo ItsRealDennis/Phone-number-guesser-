@@ -15,12 +15,13 @@ a leading `+45` / `0045` are ignored when a plan is selected.
 
 ## Website
 
-`index.html` is a single-file page for the game behind this repo: someone gave
-you a number with the last two digits missing and dared you to guess. It shows
-the number at poster size, a 10 by 10 board of every ending from 00 to 99 that
-you tick off as you try them, a running count of what is left, and copy of the
-remaining numbers. Progress is saved in the browser. No build step, no
-dependencies. Open it locally or serve the repo with GitHub Pages.
+`index.html` is the surprise that came after the guessing game: an invitation,
+in Danish, to a bonfire with roast beef, marshmallows and stars, framed as an
+official kidnapping notice. The "Nej" button runs away and eventually turns
+into a "Ja". The case number shows the phone prefix with the last two digits
+masked; open the page with the ending in the URL hash, for example
+`index.html#00`, to fill it in. No build step, no dependencies, works locally
+or on GitHub Pages.
 
 ## What it does and does not do
 

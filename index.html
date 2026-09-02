@@ -1,326 +1,352 @@
 <!doctype html>
-<html lang="en">
+<html lang="da">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Phone Number Guesser</title>
+<title>Bålbortførelsen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400;1,9..144,600&family=Azeret+Mono:wght@400;500;700&family=Instrument+Sans:wght@400;500;600&display=swap">
 <style>
   :root {
-    --bg: #0E1424;
-    --bg-2: #121A2E;
-    --surface: #182038;
-    --surface-2: #1F294A;
-    --line: #2B3656;
-    --ink: #F3EDE4;
-    --ink-2: #B9B4AE;
-    --ink-3: #7E8497;
-    --steel: #5C6A8A;
-    --coral: #FF7B87;
-    --coral-soft: rgba(255, 123, 135, 0.14);
-    --gold: #F0C98C;
-    --gold-soft: rgba(240, 201, 140, 0.16);
+    --night: #0A0E1A;
+    --night-2: #111728;
+    --surface: rgba(255, 244, 228, 0.045);
+    --line: rgba(255, 244, 228, 0.14);
+    --ink: #F6EFE4;
+    --ink-2: #C9C1B6;
+    --ink-3: #8C8798;
+    --smoke: #9A93A8;
+    --ember: #FF8A3D;
+    --ember-soft: rgba(255, 138, 61, 0.16);
+    --amber: #FFC46B;
+    --amber-soft: rgba(255, 196, 107, 0.18);
     --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
     --font-ui: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
-    --font-digit: "Azeret Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    --font-mono: "Azeret Mono", "SFMono-Regular", Menlo, Consolas, monospace;
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font-family: var(--font-ui); font-size: 16px; line-height: 1.5;
-    background-image:
-      radial-gradient(1200px 600px at 80% -10%, rgba(255, 123, 135, 0.10), transparent 60%),
-      radial-gradient(900px 500px at 0% 100%, rgba(240, 201, 140, 0.07), transparent 60%);
-    background-attachment: fixed;
+    margin: 0; background: var(--night); color: var(--ink);
+    font-family: var(--font-ui); font-size: 17px; line-height: 1.55;
+    min-height: 100vh; position: relative; overflow-x: hidden;
   }
-  a { color: var(--ink-2); }
-  .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 24px 80px; }
+  canvas#sky { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  .glow {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 55vh; z-index: 0; pointer-events: none;
+    background: radial-gradient(60% 80% at 50% 110%, rgba(255, 138, 61, 0.42), rgba(255, 90, 40, 0.16) 45%, transparent 75%);
+  }
+  canvas#embers { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+  canvas#sparks { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 20; pointer-events: none; }
+  .wrap { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; padding: 48px 24px 120px; }
 
-  /* Her message */
-  .msg { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; max-width: 560px; }
-  .msg .meta { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); padding-left: 4px; }
-  .bubble {
-    position: relative; background: var(--surface-2); border-radius: 22px 22px 22px 6px;
-    padding: 16px 20px; font-family: var(--font-display); font-style: italic; font-weight: 400;
-    font-size: clamp(19px, 2.4vw, 24px); line-height: 1.35; color: var(--ink);
-  }
-  .bubble em { font-style: italic; color: var(--coral); }
-  .msg .translate { font-size: 14px; color: var(--ink-3); padding-left: 4px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+  .eyebrow b { color: var(--amber); font-weight: 500; }
+  .status { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; color: var(--ink-3); margin-top: 6px; }
+  .status .ok { color: var(--amber); }
+  .status .bad { color: var(--ember); text-decoration: line-through; text-decoration-color: var(--ember); }
 
-  /* The number */
-  .number { margin: 56px 0 16px; }
-  .number .eyebrow { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
-  .digits {
-    font-family: var(--font-digit); font-weight: 700; font-variant-numeric: tabular-nums;
-    font-size: clamp(44px, 11vw, 132px); line-height: 1; letter-spacing: -0.02em;
-    display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 0.35em;
+  h1 {
+    font-family: var(--font-display); font-style: italic; font-weight: 500; letter-spacing: -0.015em;
+    font-size: clamp(46px, 9.5vw, 96px); line-height: 0.98; margin: 28px 0 0; text-wrap: balance;
   }
-  .digits .pair { display: inline-block; }
-  .digits .blank { color: var(--coral); position: relative; min-width: 2ch; display: inline-flex; }
-  .digits .blank span { display: inline-block; width: 1ch; text-align: center; }
-  .digits.hit .blank { color: var(--gold); text-shadow: 0 0 40px var(--gold-soft), 0 0 12px rgba(240, 201, 140, 0.4); }
-  .status { font-family: var(--font-display); font-style: italic; font-size: clamp(20px, 2.6vw, 28px); color: var(--ink-2); margin: 14px 0 0; text-wrap: balance; }
-  .status b { font-style: normal; font-family: var(--font-digit); font-weight: 500; color: var(--ink); font-size: 0.9em; }
-  .status .g { color: var(--gold); }
+  h1 .fire { color: var(--ember); font-style: italic; }
+  .lede { font-size: clamp(18px, 2.3vw, 21px); color: var(--ink-2); max-width: 30em; margin: 22px 0 0; }
+  .lede b { color: var(--ink); font-weight: 600; }
 
-  /* Stat strip */
-  .strip {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin: 32px 0 20px;
-    background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+  .notice { position: relative; margin-top: 40px; padding: 22px 24px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+  .stamp {
+    position: absolute; right: 18px; top: -14px; transform: rotate(6deg);
+    font-family: var(--font-mono); font-weight: 700; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ember); border: 2px solid var(--ember); border-radius: 6px; padding: 6px 10px; background: var(--night);
+    box-shadow: 0 0 0 3px var(--night);
   }
-  .stat { background: var(--surface); padding: 14px 18px; }
-  .stat .k { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
-  .stat .v { font-family: var(--font-digit); font-weight: 500; font-size: 28px; line-height: 1.1; font-variant-numeric: tabular-nums; margin-top: 4px; }
-  .stat .v small { font-family: var(--font-ui); font-size: 13px; color: var(--ink-3); font-weight: 400; margin-left: 6px; }
-  @media (max-width: 560px) { .strip { grid-template-columns: 1fr 1fr; } .stat:last-child { grid-column: span 2; } }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 10px 22px; margin: 0; }
+  dt { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); padding-top: 4px; }
+  dd { margin: 0; color: var(--ink); }
+  dd small { display: block; color: var(--ink-3); font-size: 14px; }
+  @media (max-width: 480px) { dl { grid-template-columns: 1fr; gap: 4px; } dd { margin-bottom: 8px; } }
 
-  /* Board */
-  .board-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; margin-bottom: 10px; }
-  .board-head h2 { font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 26px; margin: 0; }
-  .board-head p { margin: 0; font-size: 14px; color: var(--ink-3); }
-  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--ink-2); }
-  .legend span { display: inline-flex; align-items: center; gap: 6px; }
-  .sw { width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--line); background: var(--surface); }
-  .sw.tried { background: var(--bg-2); border-color: var(--steel); position: relative; }
-  .sw.hit { background: var(--gold); border-color: var(--gold); }
+  section { margin-top: 64px; }
+  h2 { font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: clamp(28px, 4vw, 38px); margin: 0 0 18px; line-height: 1.1; text-wrap: balance; }
+  h2 .fire { color: var(--ember); }
 
-  .board {
-    display: grid; grid-template-columns: 28px repeat(10, minmax(0, 1fr)); grid-auto-rows: auto; gap: 6px;
-    padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
-  }
-  .axis { font-family: var(--font-digit); font-size: 12px; color: var(--ink-3); display: flex; align-items: center; justify-content: center; }
-  .axis.corner { color: transparent; }
-  .cell {
-    font: inherit; font-family: var(--font-digit); font-weight: 500; font-size: clamp(12px, 1.9vw, 18px);
-    aspect-ratio: 1; width: 100%; border-radius: 8px; cursor: pointer;
-    border: 1px solid var(--line); background: var(--bg-2); color: var(--ink);
-    display: flex; align-items: center; justify-content: center; position: relative;
-    padding: 0;
-  }
-  .cell:hover { border-color: var(--coral); color: var(--coral); }
-  .cell:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
-  .cell.tried { color: var(--steel); border-color: transparent; background: transparent; }
-  .cell.tried::after {
-    content: ""; position: absolute; left: 18%; right: 18%; top: 50%; height: 1.5px; background: var(--steel); transform: rotate(-20deg);
-  }
-  .cell.hit { background: var(--gold); border-color: var(--gold); color: #1B1408; font-weight: 700; box-shadow: 0 0 0 4px var(--gold-soft), 0 0 30px rgba(240, 201, 140, 0.35); }
-  .cell.hit::after { display: none; }
-  .board.locked .cell:not(.hit) { opacity: 0.55; }
+  .menu { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .menu li { display: grid; grid-template-columns: 40px 1fr; gap: 18px; align-items: start; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .menu svg { width: 36px; height: 36px; margin-top: 2px; }
+  .menu .name { font-family: var(--font-display); font-style: italic; font-size: 24px; line-height: 1.15; }
+  .menu .desc { color: var(--ink-2); margin-top: 2px; }
 
-  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; }
+  .hair p { color: var(--ink-2); max-width: 34em; margin: 0 0 14px; }
+  .hair p b { color: var(--ink); }
+  .plan { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 10px; }
+  .plan li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: baseline; padding: 14px 16px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
+  .plan .n { font-family: var(--font-mono); font-weight: 700; color: var(--amber); font-size: 14px; }
+  .plan .t { color: var(--ink); }
+  .plan .t small { display: block; color: var(--ink-3); font-size: 14px; }
+
+  .rsvp { margin-top: 72px; padding: 28px 24px 32px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); position: relative; min-height: 320px; overflow: hidden; }
+  .rsvp h2 { margin-bottom: 6px; }
+  .rsvp .q { color: var(--ink-2); margin: 0 0 22px; }
+  .buttons { position: relative; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; min-height: 160px; }
   button.btn {
-    font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; padding: 10px 16px; border-radius: 999px;
-    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    font: inherit; font-weight: 600; cursor: pointer; border-radius: 999px; padding: 14px 26px; font-size: 18px;
+    border: 1px solid var(--line); background: var(--night-2); color: var(--ink);
   }
-  button.btn:hover { border-color: var(--ink-3); }
-  button.btn.primary { background: var(--coral); border-color: var(--coral); color: #2A0F13; }
-  button.btn.primary:hover { filter: brightness(1.06); }
-  button.btn:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
-  .toast { font-size: 14px; color: var(--gold); min-height: 1.4em; margin-left: 4px; }
+  button.btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+  .yes { background: var(--ember); border-color: var(--ember); color: #2A1206; transform-origin: left center; transform: scale(var(--grow, 1)); }
+  .yes:hover { filter: brightness(1.07); }
+  .no { position: relative; user-select: none; -webkit-user-select: none; touch-action: none; }
+  .no.fled { position: absolute; }
+  .taunt { margin-top: 14px; font-family: var(--font-display); font-style: italic; font-size: 20px; color: var(--ink-2); min-height: 1.5em; }
+  .done { display: none; }
+  .rsvp.confirmed .buttons, .rsvp.confirmed .q, .rsvp.confirmed .taunt { display: none; }
+  .rsvp.confirmed .done { display: block; }
+  .done .big { font-family: var(--font-display); font-style: italic; font-size: clamp(30px, 5vw, 44px); color: var(--amber); line-height: 1.1; margin: 0 0 10px; }
+  .done p { color: var(--ink-2); margin: 0 0 6px; max-width: 34em; }
+  .done .stamp { position: static; display: inline-block; margin-top: 16px; transform: rotate(-4deg); color: var(--amber); border-color: var(--amber); }
 
-  /* Notes */
-  .notes { margin-top: 48px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px 40px; }
-  .note h3 { font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 20px; margin: 0 0 6px; }
-  .note p { margin: 0; color: var(--ink-2); font-size: 15px; max-width: 48ch; }
-  .note b { font-family: var(--font-digit); font-weight: 500; color: var(--ink); font-size: 0.92em; }
-  footer { margin-top: 40px; font-size: 13px; color: var(--ink-3); max-width: 70ch; }
-
-  canvas#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+  footer { margin-top: 56px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; color: var(--ink-3); text-transform: uppercase; }
 
   @media (prefers-reduced-motion: no-preference) {
-    .cell { transition: color 120ms ease, border-color 120ms ease, background 160ms ease, transform 160ms ease; }
-    .cell:active { transform: scale(0.94); }
-    .digits .blank span { transition: transform 80ms ease; }
-    .bubble { animation: pop 500ms cubic-bezier(.2,.9,.3,1.2) both; }
-    @keyframes pop { from { transform: translateY(8px) scale(0.98); opacity: 0.6; } to { transform: none; opacity: 1; } }
+    .yes { transition: transform 260ms cubic-bezier(.2,.9,.3,1.3); }
+    .no { transition: left 180ms ease, top 180ms ease, transform 180ms ease; }
+    h1, .lede, .notice { animation: rise 700ms cubic-bezier(.2,.8,.2,1) both; }
+    .lede { animation-delay: 120ms; } .notice { animation-delay: 240ms; }
+    @keyframes rise { from { opacity: 0.4; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .glow { animation: flicker 3.2s ease-in-out infinite alternate; }
+    @keyframes flicker { from { opacity: 0.85; } 40% { opacity: 1; } 70% { opacity: 0.9; } to { opacity: 1; } }
   }
 </style>
 </head>
 <body>
 
-<canvas id="confetti" aria-hidden="true"></canvas>
-<div class="wrap">
-  <section class="msg" aria-label="Her message">
-    <span class="meta">Her, last night</span>
-    <div class="bubble" lang="da">Nu der kun 100 muligheder sammensatte tal du kan gætte på til de sidste 2 <em>😉</em></div>
-    <span class="translate">“Now there are only 100 possible combinations you can guess for the last two.”</span>
-  </section>
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="glow" aria-hidden="true"></div>
+<canvas id="embers" aria-hidden="true"></canvas>
+<canvas id="sparks" aria-hidden="true"></canvas>
 
-  <section class="number" aria-label="The number">
-    <div class="eyebrow">What she gave you</div>
-    <div class="digits" id="digits" aria-label="22 18 26, last two digits unknown">
-      <span class="pair">22</span><span class="pair">18</span><span class="pair">26</span><span class="pair blank" id="blank"><span id="d1">?</span><span id="d2">?</span></span>
-    </div>
-    <p class="status" id="status"></p>
-  </section>
+<div class="wrap" lang="da">
+  <div class="eyebrow">Officiel meddelelse · Sag nr. <b id="case">22 18 26 ··</b></div>
+  <div class="status">Nummer: <span class="ok">fundet</span> · Gæt tilbage: <span class="ok">0</span> · Undskyldninger: <span class="bad">afvist</span></div>
 
-  <div class="strip" role="group" aria-label="Progress">
-    <div class="stat"><div class="k">Muligheder</div><div class="v">100<small>to start</small></div></div>
-    <div class="stat"><div class="k">Tried</div><div class="v" id="s-tried">0</div></div>
-    <div class="stat"><div class="k">Still possible</div><div class="v" id="s-left">100<small id="s-odds">1 in 100</small></div></div>
+  <h1>Du bliver bortført.<br>Til <span class="fire">bål.</span></h1>
+  <p class="lede">Du sagde selv, der kun var 100 muligheder. Jeg skulle bruge én. <b>Nu har jeg dit nummer</b>, og så er der ingen vej udenom.</p>
+
+  <div class="notice">
+    <span class="stamp">Ingen vej udenom</span>
+    <dl>
+      <dt>Hvornår</dt><dd>Det får du ikke at vide.<small>Det er dét, bortførelse betyder.</small></dd>
+      <dt>Hvor</dt><dd>Et sted med himmel.<small>Og uden gadelys.</small></dd>
+      <dt>Dresscode</dt><dd>Noget, der gerne må lugte af røg.</dd>
+      <dt>Medbring</dt><dd>Ingenting.<small>Jeg har styr på det. Også det med håret. Se længere nede.</small></dd>
+    </dl>
   </div>
 
-  <section aria-label="Board">
-    <div class="board-head">
-      <h2>Every ending, 00 to 99</h2>
-      <div class="legend">
-        <span><i class="sw"></i>Untried</span>
-        <span><i class="sw tried"></i>Tried, not her</span>
-        <span><i class="sw hit"></i>Her</span>
-      </div>
-    </div>
-    <div class="board" id="board" role="grid" aria-label="Possible last two digits"></div>
-    <div class="toolbar">
-      <button class="btn primary" id="copy" type="button">Copy the numbers left</button>
-      <button class="btn" id="reset" type="button">Start over</button>
-      <span class="toast" id="toast" role="status" aria-live="polite"></span>
-    </div>
-    <p class="board-head" style="margin-top:10px"><span style="font-size:14px;color:var(--ink-3)">Click once for tried, twice for her, a third time to clear. Saved in this browser.</span></p>
+  <section aria-labelledby="menu-h">
+    <h2 id="menu-h">Programmet</h2>
+    <ul class="menu">
+      <li>
+        <svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M18 4c1 6 7 8 7 15a7 7 0 0 1-14 0c0-3 1.5-5 3-6 0 3 1 4 2 4 0-5 1-9 2-13z" fill="#FF8A3D"/><path d="M18 18c.5 2.5 3 3.5 3 6a3 3 0 0 1-6 0c0-1.2.6-2 1.2-2.6 0 1.2.5 1.6.9 1.6 0-2 .4-3.5.9-5z" fill="#FFC46B"/></svg>
+        <div><div class="name">Bål</div><div class="desc">Et rigtigt et. Med gnister og det hele. Ikke sådan et lille et i en skål.</div></div>
+      </li>
+      <li>
+        <svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><ellipse cx="18" cy="19" rx="12" ry="8" fill="#B5473A"/><ellipse cx="18" cy="17" rx="12" ry="7" fill="#D9705F"/><ellipse cx="18" cy="16" rx="8" ry="4" fill="#F0A090"/><path d="M8 24c4 3 16 3 20 0" stroke="#7A2E24" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <div><div class="name">Roastbeef</div><div class="desc">Over åben ild. Rosa i midten. Ikke fra en pakke i køledisken.</div></div>
+      </li>
+      <li>
+        <svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M6 32 26 12" stroke="#C9C1B6" stroke-width="2" stroke-linecap="round"/><rect x="21" y="4" width="11" height="11" rx="3" transform="rotate(20 26.5 9.5)" fill="#F6EFE4"/><path d="M23 6c2 1 3 3 4 6" stroke="#FFC46B" stroke-width="2" stroke-linecap="round"/><path d="M30 5c1 2 1.5 3.5 1 6" stroke="#B5763A" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <div><div class="name">Skumfiduser</div><div class="desc">Ristede til de er lige præcis for brændte. Du får den første.</div></div>
+      </li>
+      <li>
+        <svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M18 4l3 8 8 1-6 6 2 9-7-4-7 4 2-9-6-6 8-1z" fill="#FFC46B"/><circle cx="6" cy="8" r="1.2" fill="#F6EFE4"/><circle cx="30" cy="28" r="1.4" fill="#F6EFE4"/><circle cx="31" cy="6" r="0.9" fill="#F6EFE4"/><circle cx="5" cy="30" r="0.9" fill="#F6EFE4"/></svg>
+        <div><div class="name">Stjerner</div><div class="desc">Gratis. Kommer frem, når det bliver mørkt nok. Vi bliver, til det sker.</div></div>
+      </li>
+    </ul>
   </section>
 
-  <section class="notes" aria-label="Notes">
-    <div class="note">
-      <h3>No shortcut through the numbering plan</h3>
-      <p>Denmark's plan puts the whole <b>20</b> to <b>31</b> series on mobile. All 100 endings of <b>22 18 26</b> are real, allocatable mobile numbers, so none can be ruled out on paper. She picked her game well.</p>
+  <section class="hair" aria-labelledby="hair-h">
+    <h2 id="hair-h">Angående dit <span class="fire">hår</span></h2>
+    <p>Ja. Det kommer til at lugte af bål. <b>Det er ikke en fejl. Det er beviset på, at du var der.</b></p>
+    <p>Men fordi jeg ved, at det er dit eneste argument, har jeg lavet en plan:</p>
+    <ol class="plan">
+      <li><span class="n">01</span><span class="t">Jeg sidder på røgsiden. Hele aftenen.<small>Uanset hvor vinden vender. Jeg flytter mig.</small></span></li>
+      <li><span class="n">02</span><span class="t">Der er en hue med. Til dig.<small>Ikke til mig. Mit hår må gerne lugte.</small></span></li>
+      <li><span class="n">03</span><span class="t">Shampoo er købt. Den dyre.<small>Den står klar til bagefter.</small></span></li>
+      <li><span class="n">04</span><span class="t">Lugten er væk efter ét bad.<small>Aftenen er ikke.</small></span></li>
+    </ol>
+  </section>
+
+  <section class="rsvp" id="rsvp" aria-labelledby="rsvp-h">
+    <h2 id="rsvp-h">Kommer du?</h2>
+    <p class="q">Der er to knapper. Det er kun for syns skyld.</p>
+    <div class="buttons" id="buttons">
+      <button class="btn yes" id="yes" type="button">Ja, selvfølgelig</button>
+      <button class="btn no" id="no" type="button">Nej</button>
     </div>
-    <div class="note">
-      <h3>Guess like a person, not a robot</h3>
-      <p>People remember numbers as patterns. Doubles like <b>00</b>, <b>11</b>, <b>22</b>, runs like <b>27</b> and <b>28</b>, or something that echoes the pairs she already gave you. A few thoughtful texts beat a hundred cold ones.</p>
-    </div>
-    <div class="note">
-      <h3>Ask her for a hint</h3>
-      <p>She opened with a wink. “Is it higher than 50?” halves the board and gives her a reason to reply. That is the point of the game.</p>
+    <div class="taunt" id="taunt" aria-live="polite"></div>
+    <div class="done">
+      <p class="big">Det tænkte jeg nok.</p>
+      <p>Du hører fra mig. Ikke hvornår. Bare at du gør.</p>
+      <p>Skumfiduserne er allerede købt. Der var aldrig rigtig et valg.</p>
+      <span class="stamp">Bekræftet</span>
     </div>
   </section>
 
-  <footer>Runs entirely in your browser. Nothing here looks numbers up against carriers or messaging apps. Numbering plan: <a href="https://en.wikipedia.org/wiki/Telephone_numbers_in_Denmark">Telephone numbers in Denmark</a>.</footer>
+  <footer>Sag nr. <span id="case2">22 18 26 ··</span> · Nummer fundet · Ingen flere gæt nødvendige</footer>
 </div>
 
 <script>
 (function () {
   "use strict";
-  const PREFIX = "221826";
-  const KEY = "guesser:" + PREFIX;
+  const DEFAULT_ENDING = "";
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  let state = {};
-  try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (_) { state = {}; }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) {} }
-
   const $ = (id) => document.getElementById(id);
-  const board = $("board"), digits = $("digits"), d1 = $("d1"), d2 = $("d2"), statusEl = $("status"), toastEl = $("toast");
 
-  // Build the board: rows are the first digit, columns the second.
-  const frag = document.createDocumentFragment();
-  const corner = document.createElement("div"); corner.className = "axis corner"; corner.textContent = "0"; frag.appendChild(corner);
-  for (let c = 0; c < 10; c++) { const a = document.createElement("div"); a.className = "axis"; a.textContent = "·" + c; frag.appendChild(a); }
-  for (let r = 0; r < 10; r++) {
-    const a = document.createElement("div"); a.className = "axis"; a.textContent = r + "·"; frag.appendChild(a);
-    for (let c = 0; c < 10; c++) {
-      const code = "" + r + c;
-      const b = document.createElement("button");
-      b.type = "button"; b.className = "cell"; b.dataset.code = code; b.textContent = code;
-      b.setAttribute("aria-label", "Ending " + code + ", " + PREFIX + code);
-      b.setAttribute("role", "gridcell");
-      frag.appendChild(b);
+  // Case number: prefix plus the ending she gave up.
+  const m = /^#(\d{2})$/.exec(location.hash);
+  const ending = m ? m[1] : DEFAULT_ENDING;
+  const shown = "22 18 26 " + (ending || "··");
+  $("case").textContent = shown; $("case2").textContent = shown;
+
+  // ---------- Sky: stars and the odd shooting star ----------
+  const sky = $("sky"), sctx = sky.getContext("2d");
+  let stars = [], shooting = null, W = 0, H = 0, dpr = 1;
+  function sizeAll() {
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = innerWidth; H = innerHeight;
+    for (const c of [sky, embersC, sparksC]) { c.width = W * dpr; c.height = H * dpr; c.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0); }
+    stars = Array.from({ length: Math.round(W * H / 6000) }, () => ({
+      x: Math.random() * W, y: Math.random() * H * 0.85, r: Math.random() * 1.3 + 0.3,
+      p: Math.random() * Math.PI * 2, s: 0.4 + Math.random() * 1.2, w: Math.random() < 0.12
+    }));
+    drawSky(0);
+  }
+  function drawSky(t) {
+    sctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      const a = reduce ? 0.7 : 0.45 + 0.45 * Math.sin(s.p + t * 0.0012 * s.s);
+      sctx.globalAlpha = a; sctx.fillStyle = s.w ? "#FFE1B3" : "#F6EFE4";
+      sctx.beginPath(); sctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); sctx.fill();
+    }
+    sctx.globalAlpha = 1;
+    if (shooting) {
+      const sh = shooting; sh.x += sh.vx; sh.y += sh.vy; sh.life -= 0.02;
+      const g = sctx.createLinearGradient(sh.x, sh.y, sh.x - sh.vx * 12, sh.y - sh.vy * 12);
+      g.addColorStop(0, "rgba(255,244,228," + Math.max(0, sh.life) + ")"); g.addColorStop(1, "rgba(255,244,228,0)");
+      sctx.strokeStyle = g; sctx.lineWidth = 1.6; sctx.beginPath(); sctx.moveTo(sh.x, sh.y); sctx.lineTo(sh.x - sh.vx * 12, sh.y - sh.vy * 12); sctx.stroke();
+      if (sh.life <= 0 || sh.x > W + 50 || sh.y > H) shooting = null;
+    } else if (!reduce && Math.random() < 0.004) {
+      shooting = { x: Math.random() * W * 0.7, y: Math.random() * H * 0.3, vx: 7 + Math.random() * 4, vy: 3 + Math.random() * 2, life: 1 };
     }
   }
-  board.appendChild(frag);
 
-  function hitCode() { for (const k in state) if (state[k] === "hit") return k; return null; }
-
-  function render() {
-    const hit = hitCode();
-    let tried = 0;
-    for (const b of board.querySelectorAll(".cell")) {
-      const s = state[b.dataset.code];
-      b.classList.toggle("tried", s === "tried");
-      b.classList.toggle("hit", s === "hit");
-      b.setAttribute("aria-pressed", s ? "true" : "false");
-      if (s === "tried") tried++;
+  // ---------- Embers drifting up from the fire ----------
+  const embersC = $("embers"), ectx = embersC.getContext("2d");
+  const embers = [];
+  function spawnEmber() {
+    embers.push({ x: W * (0.3 + Math.random() * 0.4), y: H + 10, vx: (Math.random() - 0.5) * 0.6, vy: -(0.6 + Math.random() * 1.4), r: 1 + Math.random() * 2.2, life: 1, hue: Math.random() < 0.5 ? "#FF8A3D" : "#FFC46B" });
+  }
+  function drawEmbers() {
+    ectx.clearRect(0, 0, W, H);
+    if (embers.length < 60 && Math.random() < 0.5) spawnEmber();
+    for (let i = embers.length - 1; i >= 0; i--) {
+      const e = embers[i];
+      e.x += e.vx + Math.sin(e.y * 0.02) * 0.4; e.y += e.vy; e.life -= 0.0035;
+      if (e.life <= 0) { embers.splice(i, 1); continue; }
+      ectx.globalAlpha = Math.max(0, e.life) * 0.9; ectx.fillStyle = e.hue;
+      ectx.beginPath(); ectx.arc(e.x, e.y, e.r * (0.6 + e.life * 0.4), 0, Math.PI * 2); ectx.fill();
     }
-    board.classList.toggle("locked", !!hit);
-    const left = hit ? 1 : 100 - tried;
-    $("s-tried").textContent = tried;
-    $("s-left").firstChild.textContent = left;
-    $("s-odds").textContent = hit ? "found" : ("1 in " + left);
-    digits.classList.toggle("hit", !!hit);
-    if (hit) {
-      d1.textContent = hit[0]; d2.textContent = hit[1];
-      statusEl.innerHTML = 'It was <b class="g">' + fmt(PREFIX + hit) + '</b>. Told you the odds were fine.';
-    } else if (tried === 0) {
-      statusEl.innerHTML = "One of a hundred. <b>22 18 26 ??</b>";
-    } else if (left === 1) {
-      const last = lastLeft();
-      statusEl.innerHTML = 'Only one left: <b>' + fmt(PREFIX + last) + '</b>. That is the one.';
-    } else {
-      statusEl.innerHTML = tried + " down, " + left + " to go.";
+    ectx.globalAlpha = 1;
+  }
+
+  // ---------- Sparks when she says yes ----------
+  const sparksC = $("sparks"), pctx = sparksC.getContext("2d");
+  let sparks = [];
+  function burst(x, y) {
+    const cols = ["#FFC46B", "#FF8A3D", "#F6EFE4", "#FFD9A8"];
+    for (let i = 0; i < 140; i++) {
+      const a = Math.random() * Math.PI * 2, v = 3 + Math.random() * 9;
+      sparks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 4, s: 2 + Math.random() * 3, c: cols[i % cols.length], life: 1 });
     }
   }
-  function lastLeft() { for (let i = 0; i < 100; i++) { const k = String(i).padStart(2, "0"); if (state[k] !== "tried") return k; } return "00"; }
-  function fmt(n) { return n.replace(/(\d{2})(?=\d)/g, "$1 "); }
+  function drawSparks() {
+    if (!sparks.length) return;
+    pctx.clearRect(0, 0, W, H);
+    sparks = sparks.filter(p => p.life > 0);
+    for (const p of sparks) {
+      p.vy += 0.22; p.x += p.vx; p.y += p.vy; p.life -= 0.012;
+      pctx.globalAlpha = Math.max(0, p.life); pctx.fillStyle = p.c;
+      pctx.beginPath(); pctx.arc(p.x, p.y, p.s * p.life, 0, Math.PI * 2); pctx.fill();
+    }
+    pctx.globalAlpha = 1;
+    if (!sparks.length) pctx.clearRect(0, 0, W, H);
+  }
 
-  board.addEventListener("click", (e) => {
-    const b = e.target.closest(".cell"); if (!b) return;
-    const code = b.dataset.code, s = state[code];
-    if (!s) state[code] = "tried";
-    else if (s === "tried") { for (const k in state) if (state[k] === "hit") delete state[k]; state[code] = "hit"; }
-    else delete state[code];
-    save(); render();
-    if (state[code] === "hit" && !reduce) burst(b);
-  });
-
-  $("reset").addEventListener("click", () => { state = {}; save(); render(); toast("Board cleared."); });
-  $("copy").addEventListener("click", async () => {
-    const hit = hitCode();
-    const list = hit ? [PREFIX + hit] : [];
-    if (!hit) for (let i = 0; i < 100; i++) { const k = String(i).padStart(2, "0"); if (state[k] !== "tried") list.push(PREFIX + k); }
-    const text = list.join("\n");
-    try { await navigator.clipboard.writeText(text); toast("Copied " + list.length + " number" + (list.length === 1 ? "" : "s") + "."); }
-    catch (_) { toast("Copy blocked here. Select the board and copy by hand."); }
-  });
-  function toast(m) { toastEl.textContent = m; clearTimeout(toast.t); toast.t = setTimeout(() => { toastEl.textContent = ""; }, 2400); }
-
-  // Rolling blanks while the answer is unknown.
+  sizeAll();
+  window.addEventListener("resize", sizeAll);
   if (!reduce) {
-    let tick = 0;
-    setInterval(() => {
-      if (hitCode()) return;
-      tick++;
-      if (tick % 2 === 0) d1.textContent = String(Math.floor(Math.random() * 10));
-      d2.textContent = String(Math.floor(Math.random() * 10));
-    }, 110);
+    (function loop(t) { drawSky(t); drawEmbers(); drawSparks(); requestAnimationFrame(loop); })(0);
   }
 
-  // Confetti on a hit, small and short.
-  const cv = $("confetti"), ctx = cv.getContext("2d");
-  function burst(el) {
-    const r = el.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-    const colors = ["#F0C98C", "#FF7B87", "#F3EDE4", "#FFD9A8"];
-    const ps = Array.from({ length: 90 }, () => {
-      const a = Math.random() * Math.PI * 2, v = 4 + Math.random() * 7;
-      return { x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 3, s: 3 + Math.random() * 4, c: colors[Math.random() * colors.length | 0], rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4, life: 1 };
-    });
-    let t0 = performance.now();
-    (function frame(now) {
-      const dt = Math.min(32, now - t0) / 16; t0 = now;
-      ctx.clearRect(0, 0, innerWidth, innerHeight);
-      let alive = false;
-      for (const p of ps) {
-        p.vy += 0.25 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt; p.life -= 0.012 * dt;
-        if (p.life <= 0) continue; alive = true;
-        ctx.save(); ctx.globalAlpha = Math.max(0, p.life); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-        ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6); ctx.restore();
-      }
-      if (alive) requestAnimationFrame(frame); else ctx.clearRect(0, 0, innerWidth, innerHeight);
-    })(t0);
+  // ---------- The button she cannot press ----------
+  const no = $("no"), yes = $("yes"), buttons = $("buttons"), taunt = $("taunt"), rsvp = $("rsvp");
+  const lines = [
+    "Nej?",
+    "Er du sikker?",
+    "Håret klarer sig.",
+    "Der er skumfiduser.",
+    "Jeg tager shampoo med.",
+    "Den dyre shampoo.",
+    "Der er stjerner…",
+    "Du får den første skumfidus.",
+    "Okay. Ja."
+  ];
+  const taunts = [
+    "Den knap virker vist ikke helt.",
+    "Prøv igen. Eller lad være.",
+    "Jeg sagde jo, det kun var for syns skyld.",
+    "Den anden knap står stille. Bare så du ved det.",
+    "Du løber ikke fra et bål.",
+    "Hår kan vaskes. Det her kan ikke.",
+    "Stjernerne venter ikke for evigt. Det gør jeg dog.",
+    "Så tæt på. Bare tryk på den anden.",
+    "Nu er den også en ja-knap."
+  ];
+  let tries = 0;
+  function flee() {
+    tries++;
+    const i = Math.min(tries - 1, lines.length - 1);
+    no.textContent = lines[i];
+    taunt.textContent = taunts[i];
+    yes.style.setProperty("--grow", String(Math.min(1.7, 1 + tries * 0.08)));
+    if (tries >= lines.length) { no.classList.add("became-yes"); no.classList.remove("no"); no.style.position = ""; no.style.left = ""; no.style.top = ""; return; }
+    const area = buttons.getBoundingClientRect();
+    if (!no.classList.contains("fled")) { no.classList.add("fled"); }
+    const bw = no.offsetWidth, bh = no.offsetHeight;
+    const maxX = Math.max(0, area.width - bw), maxY = Math.max(0, area.height - bh);
+    let x, y, guard = 0;
+    do { x = Math.random() * maxX; y = Math.random() * maxY; guard++; }
+    while (guard < 20 && Math.abs(x - parseFloat(no.style.left || "0")) < 80 && Math.abs(y - parseFloat(no.style.top || "0")) < 40);
+    no.style.left = x + "px"; no.style.top = y + "px";
+    no.style.transform = "rotate(" + ((Math.random() - 0.5) * 14) + "deg)";
   }
+  no.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && !no.classList.contains("became-yes")) flee(); });
+  no.addEventListener("pointerdown", (e) => { if (no.classList.contains("became-yes")) return; e.preventDefault(); flee(); });
+  no.addEventListener("click", (e) => { if (no.classList.contains("became-yes")) return confirm(e); e.preventDefault(); flee(); });
+  no.addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && !no.classList.contains("became-yes")) { e.preventDefault(); flee(); } });
 
-  render();
+  function confirm(e) {
+    rsvp.classList.add("confirmed");
+    if (!reduce) {
+      const r = (e && e.currentTarget && e.currentTarget.getBoundingClientRect) ? e.currentTarget.getBoundingClientRect() : rsvp.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height / 2);
+      setTimeout(() => burst(W * 0.3, H * 0.4), 250);
+      setTimeout(() => burst(W * 0.7, H * 0.35), 500);
+    }
+    rsvp.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
+  }
+  yes.addEventListener("click", confirm);
 })();
 </script>
 </body>
