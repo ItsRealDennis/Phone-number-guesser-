@@ -2,6 +2,7 @@ import "./style.css";
 import { PREFIX, ENDING, REPLY_TO, REDUCE } from "./config.js";
 import { startSky, setEmbers, shoot, burst, viewport } from "./sky.js";
 import { createFire } from "./fire.js";
+import { setBackdrop } from "./backdrop.js";
 
 const $ = (id) => document.getElementById(id);
 startSky();
@@ -18,7 +19,10 @@ function go(n) {
   scenes[current].classList.add("active");
   [...dots.children].forEach((d, i) => { d.classList.toggle("on", i === n); d.classList.toggle("past", i < n); });
   scenes[current].dispatchEvent(new CustomEvent("enter"));
+  setBackdrop(BACKDROPS[scenes[current].dataset.scene] || null);
 }
+// Which photo sits behind each scene. Scene 2 earns its photo when she asks where.
+const BACKDROPS = { fire: "meadow", stars: "meadow" };
 document.querySelectorAll("[data-next]").forEach(b => b.addEventListener("click", () => go(current + 1)));
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowRight" && scenes[current].querySelector("[data-next]:not(.hidden)")) go(current + 1);
@@ -63,6 +67,7 @@ go(0);
   const where = $("where"), answer = $("where-answer"), next = scenes[1].querySelector("[data-next]");
   where.addEventListener("click", () => {
     where.classList.add("hidden"); answer.classList.remove("hidden"); next.classList.remove("hidden");
+    BACKDROPS.kidnap = "meadow"; setBackdrop("meadow");
     setEmbers(true);
     if (!REDUCE) { const { W, H } = viewport(); burst(W / 2, H * 0.55, 90); }
   });
@@ -191,6 +196,7 @@ go(0);
       setTimeout(() => burst(W * 0.7, H * 0.3), 500);
     }
     setEmbers(true);
+    BACKDROPS.rsvp = "close"; setBackdrop("close");
   }
   yes.addEventListener("click", confirm);
 }

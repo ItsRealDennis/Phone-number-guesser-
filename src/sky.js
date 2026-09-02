@@ -5,7 +5,7 @@ const sky = document.getElementById("sky"), sctx = sky.getContext("2d");
 const embersC = document.getElementById("embers"), ectx = embersC.getContext("2d");
 const sparksC = document.getElementById("sparks"), pctx = sparksC.getContext("2d");
 let W = 0, H = 0, stars = [], shooters = [], embers = [], sparks = [];
-let embersOn = false;
+let embersOn = false, topDirty = false;
 
 function size() {
   const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -26,14 +26,6 @@ function drawSky(t) {
     sctx.beginPath(); sctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); sctx.fill();
   }
   sctx.globalAlpha = 1;
-  for (let i = shooters.length - 1; i >= 0; i--) {
-    const sh = shooters[i];
-    sh.x += sh.vx; sh.y += sh.vy; sh.life -= 0.02;
-    const g = sctx.createLinearGradient(sh.x, sh.y, sh.x - sh.vx * 14, sh.y - sh.vy * 14);
-    g.addColorStop(0, `rgba(255,244,228,${Math.max(0, sh.life)})`); g.addColorStop(1, "rgba(255,244,228,0)");
-    sctx.strokeStyle = g; sctx.lineWidth = 1.8; sctx.beginPath(); sctx.moveTo(sh.x, sh.y); sctx.lineTo(sh.x - sh.vx * 14, sh.y - sh.vy * 14); sctx.stroke();
-    if (sh.life <= 0 || sh.x > W + 60 || sh.y > H + 60) shooters.splice(i, 1);
-  }
   if (!REDUCE && Math.random() < 0.003) shoot(Math.random() * W * 0.7, Math.random() * H * 0.3);
 }
 
@@ -66,8 +58,16 @@ export function burst(x, y, n = 140) {
   }
 }
 function drawSparks() {
-  if (!sparks.length) return;
-  pctx.clearRect(0, 0, W, H);
+  if (!sparks.length && !shooters.length) { if (topDirty) { pctx.clearRect(0, 0, W, H); topDirty = false; } return; }
+  pctx.clearRect(0, 0, W, H); topDirty = true;
+  for (let i = shooters.length - 1; i >= 0; i--) {
+    const sh = shooters[i];
+    sh.x += sh.vx; sh.y += sh.vy; sh.life -= 0.02;
+    const g = pctx.createLinearGradient(sh.x, sh.y, sh.x - sh.vx * 14, sh.y - sh.vy * 14);
+    g.addColorStop(0, `rgba(255,244,228,${Math.max(0, sh.life)})`); g.addColorStop(1, "rgba(255,244,228,0)");
+    pctx.strokeStyle = g; pctx.lineWidth = 1.8; pctx.beginPath(); pctx.moveTo(sh.x, sh.y); pctx.lineTo(sh.x - sh.vx * 14, sh.y - sh.vy * 14); pctx.stroke();
+    if (sh.life <= 0 || sh.x > W + 60 || sh.y > H + 60) shooters.splice(i, 1);
+  }
   sparks = sparks.filter(p => p.life > 0);
   for (const p of sparks) {
     p.vy += 0.22; p.x += p.vx; p.y += p.vy; p.life -= 0.012;
@@ -75,7 +75,6 @@ function drawSparks() {
     pctx.beginPath(); pctx.arc(p.x, p.y, Math.max(0, p.s * p.life), 0, Math.PI * 2); pctx.fill();
   }
   pctx.globalAlpha = 1;
-  if (!sparks.length) pctx.clearRect(0, 0, W, H);
 }
 
 export function startSky() {

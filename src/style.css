@@ -16,17 +16,21 @@ body {
 }
 canvas#sky, canvas#embers, canvas#sparks, .glow { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 canvas#sky { z-index: 0; }
+#backdrop { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 1.2s ease; }
+#backdrop.on { opacity: 1; }
+#backdrop img, #backdrop video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 70%; }
+#backdrop .veil { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(10,14,26,.62), rgba(10,14,26,.28) 45%, rgba(10,14,26,.45)); }
 .glow {
-  z-index: 0; top: auto; height: 55vh; opacity: 0; transition: opacity 1.6s ease;
+  z-index: 1; top: auto; height: 55vh; opacity: 0; transition: opacity 1.6s ease;
   background: radial-gradient(60% 80% at 50% 110%, rgba(255, 138, 61, 0.45), rgba(255, 90, 40, 0.16) 45%, transparent 75%);
 }
 .glow.on { opacity: 1; }
-canvas#embers { z-index: 1; }
+canvas#embers { z-index: 2; }
 canvas#sparks { z-index: 20; }
 
 .hidden { display: none !important; }
 
-main { position: relative; z-index: 2; height: 100%; }
+main { position: relative; z-index: 3; height: 100%; }
 .scene {
   position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center;
   gap: 22px; padding: 24px 24px 72px; text-align: center; max-width: 720px; margin: 0 auto;
@@ -34,8 +38,9 @@ main { position: relative; z-index: 2; height: 100%; }
 .scene.active { display: flex; }
 
 .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); margin: 0; }
-.line { font-family: var(--font-display); font-style: italic; font-size: clamp(20px, 3vw, 26px); color: var(--ink-2); margin: 0; min-height: 1.4em; text-wrap: balance; }
+.line { text-shadow: 0 1px 12px rgba(10,14,26,.8); font-family: var(--font-display); font-style: italic; font-size: clamp(20px, 3vw, 26px); color: var(--ink-2); margin: 0; min-height: 1.4em; text-wrap: balance; }
 .display {
+  text-shadow: 0 2px 24px rgba(10,14,26,.85);
   font-family: var(--font-display); font-style: italic; font-weight: 500; letter-spacing: -0.015em;
   font-size: clamp(44px, 10vw, 96px); line-height: 0.98; margin: 0; text-wrap: balance;
 }
@@ -82,8 +87,8 @@ main { position: relative; z-index: 2; height: 100%; }
 }
 .mallow.roasting { transform: translateX(-50%) translateY(26px); transition: transform 300ms ease; }
 
-.tapzone { position: fixed; inset: 0; z-index: 3; cursor: crosshair; }
-.scene[data-scene="stars"] .line, .scene[data-scene="stars"] .btn { position: relative; z-index: 4; }
+.tapzone { position: fixed; inset: 0; z-index: 4; cursor: crosshair; }
+.scene[data-scene="stars"] .line, .scene[data-scene="stars"] .btn { position: relative; z-index: 5; }
 
 .camp { width: min(92vw, 520px); }
 .camp svg { width: 100%; height: auto; display: block; }
@@ -104,7 +109,7 @@ main { position: relative; z-index: 2; height: 100%; }
 .no.fled { position: absolute; z-index: 1; }
 .done { display: flex; flex-direction: column; align-items: center; gap: 18px; }
 
-.dots { position: fixed; left: 0; right: 0; bottom: 22px; z-index: 5; display: flex; justify-content: center; gap: 8px; }
+.dots { position: fixed; left: 0; right: 0; bottom: 22px; z-index: 6; display: flex; justify-content: center; gap: 8px; }
 .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); transition: background 300ms, transform 300ms; }
 .dots i.on { background: var(--amber); transform: scale(1.25); }
 .dots i.past { background: var(--ink-3); }

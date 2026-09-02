@@ -30,8 +30,9 @@ optional phone number for a "text him back" button on the last scene.
 
 1. Import the GitHub repo in Vercel. It detects Vite and uses `npm run build`
    with `dist` as the output directory. No other settings are needed.
-2. Under Environment Variables, add `VITE_ENDING` with the two digits, and
-   optionally `VITE_REPLY_TO`.
+2. Under Environment Variables, add `VITE_ENDING` with the two digits,
+   `VITE_SITE_URL` with the site's public URL (this switches on the share
+   image for links sent over SMS and chat), and optionally `VITE_REPLY_TO`.
 3. Deploy. The number is baked in at build time and never lives in the repo.
 
 The ending can also be passed in the URL hash, for example `/#00`, which wins
@@ -41,6 +42,11 @@ over the environment variable.
 
 - `index.html`, `src/` are the Vite app. `main.js` holds the scene logic,
   `sky.js` the star, ember and spark canvases, `fire.js` the bonfire.
+- `public/bg/` holds the photo and loop backdrops generated in Higgsfield:
+  a coastal meadow under the Milky Way (landscape and portrait) behind the
+  "Til bål", bonfire and stars scenes, and a close-up of embers behind the
+  confirmation. Stills show first and under reduced motion; the 5 s loops
+  play where they can. See `public/bg/README.md` for sources.
 - `npm run build:single` produces `dist-single/index.html`, a one-file build
   for sharing without a server.
 - `cli/phone_guesser.py` is the original command-line tool that expands a
