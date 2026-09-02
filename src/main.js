@@ -70,15 +70,15 @@ go(0);
 
 // ---------- Scene 3: build the fire, roast the marshmallow ----------
 {
-  const canvas = $("firecanvas"), line = $("fire-line"), light = $("light"), roast = $("roast"), next = scenes[2].querySelector("[data-next]");
+  const canvas = $("firecanvas"), firebox = $("firebox"), line = $("fire-line"), light = $("light"), roast = $("roast"), next = scenes[2].querySelector("[data-next]");
   const mallow = $("mallow"), puff = $("puff");
   let fire, lit = false, stage = 0;
   scenes[2].addEventListener("enter", () => { if (!fire) fire = createFire(canvas); });
   canvas.addEventListener("click", () => {
     if (lit || !fire) return;
     fire.addLog();
-    if (fire.logs >= 3) { line.textContent = "Det er nok brænde."; light.classList.remove("hidden"); }
-    else line.textContent = fire.logs === 1 ? "Mere." : "Lidt mere.";
+    if (fire.logs >= 3) { line.textContent = "Perfekt. Tryk på Tænd."; firebox.classList.add("ready"); light.classList.remove("hidden"); }
+    else line.textContent = fire.logs === 1 ? "Godt. 2 tryk tilbage." : "Ét tryk mere.";
   });
   light.addEventListener("click", () => {
     lit = true; fire.light(); light.classList.add("hidden");
@@ -121,12 +121,13 @@ go(0);
 
 // ---------- Scene 4: tap the sky ----------
 {
-  const zone = $("tapzone"), line = $("stars-line"), next = scenes[3].querySelector("[data-next]");
+  const zone = $("tapzone"), line = $("stars-line"), count = $("star-count"), next = scenes[3].querySelector("[data-next]");
   let taps = 0;
   const lines = ["Igen.", "Én til.", "Ønsk dig noget.", "Sig det ikke højt."];
   zone.addEventListener("pointerdown", (e) => {
     shoot(e.clientX, e.clientY); taps++;
     line.textContent = lines[Math.min(taps - 1, lines.length - 1)];
+    count.textContent = taps < 3 ? `Tryk på himlen · ${taps}/3` : "Ønske sendt ✓";
     if (taps >= 3) next.classList.remove("hidden");
   });
 }
