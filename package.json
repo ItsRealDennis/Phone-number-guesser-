@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "build:single": "vite build --config vite.single.config.js",
-    "test:cli": "python3 -m unittest discover -s cli/tests -v"
+    "test:cli": "cd cli && python3 -m unittest discover -s tests -v"
   },
   "devDependencies": {
     "vite": "^5.4.21",
