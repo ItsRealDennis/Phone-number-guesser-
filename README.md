@@ -15,9 +15,12 @@ a leading `+45` / `0045` are ignored when a plan is selected.
 
 ## Website
 
-Open `index.html` in a browser, or serve the repo with GitHub Pages. It runs
-entirely client-side: type a mask, pick a numbering plan, toggle categories,
-and copy the result as a list or CSV. No build step and no dependencies.
+`index.html` is a single-file page for the game behind this repo: someone gave
+you a number with the last two digits missing and dared you to guess. It shows
+the number at poster size, a 10 by 10 board of every ending from 00 to 99 that
+you tick off as you try them, a running count of what is left, and copy of the
+remaining numbers. Progress is saved in the browser. No build step, no
+dependencies. Open it locally or serve the repo with GitHub Pages.
 
 ## What it does and does not do
 
