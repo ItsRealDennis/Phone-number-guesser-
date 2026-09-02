@@ -2,7 +2,6 @@ import "./style.css";
 import { PREFIX, ENDING, REPLY_TO, REDUCE } from "./config.js";
 import { startSky, setEmbers, shoot, burst, viewport } from "./sky.js";
 import { createFire } from "./fire.js";
-import { setBackdrop } from "./backdrop.js";
 
 const $ = (id) => document.getElementById(id);
 startSky();
@@ -19,10 +18,7 @@ function go(n) {
   scenes[current].classList.add("active");
   [...dots.children].forEach((d, i) => { d.classList.toggle("on", i === n); d.classList.toggle("past", i < n); });
   scenes[current].dispatchEvent(new CustomEvent("enter"));
-  setBackdrop(BACKDROPS[scenes[current].dataset.scene] || null);
 }
-// Which photo sits behind each scene. Scene 2 earns its photo when she asks where.
-const BACKDROPS = { fire: "meadow", stars: "meadow" };
 document.querySelectorAll("[data-next]").forEach(b => b.addEventListener("click", () => go(current + 1)));
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowRight" && scenes[current].querySelector("[data-next]:not(.hidden)")) go(current + 1);
@@ -67,7 +63,6 @@ go(0);
   const where = $("where"), answer = $("where-answer"), next = scenes[1].querySelector("[data-next]");
   where.addEventListener("click", () => {
     where.classList.add("hidden"); answer.classList.remove("hidden"); next.classList.remove("hidden");
-    BACKDROPS.kidnap = "meadow"; setBackdrop("meadow");
     setEmbers(true);
     if (!REDUCE) { const { W, H } = viewport(); burst(W / 2, H * 0.55, 90); }
   });
@@ -75,25 +70,26 @@ go(0);
 
 // ---------- Scene 3: build the fire, roast the marshmallow ----------
 {
-  const canvas = $("firecanvas"), line = $("fire-line"), light = $("light"), roast = $("roast"), next = scenes[2].querySelector("[data-next]");
+  const canvas = $("firecanvas"), firebox = $("firebox"), line = $("fire-line"), light = $("light"), roast = $("roast"), next = scenes[2].querySelector("[data-next]");
   const mallow = $("mallow"), puff = $("puff");
   let fire, lit = false, stage = 0;
   scenes[2].addEventListener("enter", () => { if (!fire) fire = createFire(canvas); });
   canvas.addEventListener("click", () => {
     if (lit || !fire) return;
     fire.addLog();
-    if (fire.logs >= 3) { line.textContent = "Det er nok brænde."; light.classList.remove("hidden"); }
-    else line.textContent = fire.logs === 1 ? "Mere." : "Lidt mere.";
+    if (fire.logs >= 3) { line.textContent = "Perfekt. Tryk på Tænd."; firebox.classList.add("ready"); light.classList.remove("hidden"); }
+    else line.textContent = fire.logs === 1 ? "Godt. 2 tryk tilbage." : "Ét tryk mere.";
   });
   light.addEventListener("click", () => {
     lit = true; fire.light(); light.classList.add("hidden");
-    line.textContent = "Sådan. Roastbeef?";
+    firebox.classList.remove("ready");
+    line.textContent = "Tryk på bålet for at sætte roastbeef over.";
     canvas.style.cursor = "pointer";
     stage = 1;
   });
   canvas.addEventListener("click", () => {
     if (stage !== 1) return;
-    fire.setRoast(true); stage = 2;
+    fire.setRoast(true); firebox.classList.add("ready"); stage = 2;
     line.textContent = "Nu skumfidusen. Hold knappen.";
     roast.classList.remove("hidden"); mallow.classList.remove("hidden");
   });
@@ -126,12 +122,13 @@ go(0);
 
 // ---------- Scene 4: tap the sky ----------
 {
-  const zone = $("tapzone"), line = $("stars-line"), next = scenes[3].querySelector("[data-next]");
+  const zone = $("tapzone"), line = $("stars-line"), count = $("star-count"), next = scenes[3].querySelector("[data-next]");
   let taps = 0;
   const lines = ["Igen.", "Én til.", "Ønsk dig noget.", "Sig det ikke højt."];
   zone.addEventListener("pointerdown", (e) => {
     shoot(e.clientX, e.clientY); taps++;
     line.textContent = lines[Math.min(taps - 1, lines.length - 1)];
+    count.textContent = taps < 3 ? `Tryk på himlen · ${taps}/3` : "Ønske sendt ✓";
     if (taps >= 3) next.classList.remove("hidden");
   });
 }
@@ -196,7 +193,6 @@ go(0);
       setTimeout(() => burst(W * 0.7, H * 0.3), 500);
     }
     setEmbers(true);
-    BACKDROPS.rsvp = "close"; setBackdrop("close");
   }
   yes.addEventListener("click", confirm);
 }

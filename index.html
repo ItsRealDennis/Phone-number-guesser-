@@ -8,7 +8,11 @@
   <meta name="theme-color" content="#0A0E1A">
   <meta property="og:title" content="Bålbortførelsen">
   <meta property="og:description" content="Du bliver bortført. Til bål.">
-  <!--og-image-->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://phone-lime-five.vercel.app/">
+  <meta property="og:image" content="https://phone-lime-five.vercel.app/bg/og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://phone-lime-five.vercel.app/">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400;1,9..144,600&family=Azeret+Mono:wght@400;500;700&family=Instrument+Sans:wght@400;500;600&display=swap">
@@ -16,11 +20,6 @@
 </head>
 <body>
   <canvas id="sky" aria-hidden="true"></canvas>
-  <div id="backdrop" aria-hidden="true">
-    <img id="backdrop-img" alt="" decoding="async">
-    <video id="backdrop-video" class="hidden" autoplay muted loop playsinline disablepictureinpicture></video>
-    <div class="veil"></div>
-  </div>
   <div class="glow" id="glow" aria-hidden="true"></div>
   <canvas id="embers" aria-hidden="true"></canvas>
   <canvas id="sparks" aria-hidden="true"></canvas>
@@ -32,7 +31,7 @@
       <div class="digits" id="digits">
         <span>22</span><span>18</span><span>26</span><span class="blank" id="blank"><b id="b1">_</b><b id="b2">_</b></span>
       </div>
-      <p class="line" id="unlock-line">Du kender de sidste to.</p>
+      <p class="line" id="unlock-line">Tast de 2 manglende cifre.</p>
       <div class="keypad" id="keypad" role="group" aria-label="Tastatur">
         <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
         <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
@@ -41,15 +40,27 @@
       </div>
     </section>
 
-    <section class="scene" data-scene="kidnap" aria-label="Bortførelse">
+    <section class="scene has-media" data-scene="kidnap" aria-label="Bortførelse">
+      <video class="scene-media portrait" autoplay muted loop playsinline preload="metadata" poster="/bg/meadow-9x16.jpg" aria-hidden="true" tabindex="-1">
+        <source src="/bg/meadow-9x16.webm" type="video/webm">
+        <source src="/bg/meadow-9x16.mp4" type="video/mp4">
+      </video>
+      <video class="scene-media landscape" autoplay muted loop playsinline preload="metadata" poster="/bg/meadow-16x9.jpg" aria-hidden="true" tabindex="-1">
+        <source src="/bg/meadow-16x9.webm" type="video/webm">
+        <source src="/bg/meadow-16x9.mp4" type="video/mp4">
+      </video>
       <h1 class="display">Du bliver<br>bortført.</h1>
       <button class="btn big" id="where" type="button">Hvorhen?</button>
       <h1 class="display fire hidden" id="where-answer">Til bål.</h1>
       <button class="btn next hidden" data-next type="button">Videre</button>
     </section>
 
-    <section class="scene" data-scene="fire" aria-label="Bålet">
-      <p class="line" id="fire-line">Tryk for at lægge brænde.</p>
+    <section class="scene has-media" data-scene="fire" aria-label="Bålet">
+      <video class="scene-media" autoplay muted loop playsinline preload="metadata" poster="/bg/close-16x9.jpg" aria-hidden="true" tabindex="-1">
+        <source src="/bg/close-16x9.webm" type="video/webm">
+        <source src="/bg/close-16x9.mp4" type="video/mp4">
+      </video>
+      <p class="line" id="fire-line">Tryk på bålet 3 gange.</p>
       <div class="firebox" id="firebox">
         <canvas id="firecanvas"></canvas>
         <div class="mallow hidden" id="mallow"><div class="stick"></div><div class="puff" id="puff"></div></div>
@@ -62,7 +73,8 @@
     </section>
 
     <section class="scene" data-scene="stars" aria-label="Stjerner">
-      <p class="line" id="stars-line">Tryk på himlen.</p>
+      <p class="line" id="stars-line">Lav tre stjerneskud.</p>
+      <div class="tap-prompt" aria-hidden="true"><span class="tap-pulse"></span><span id="star-count">Tryk på himlen · 0/3</span></div>
       <div class="tapzone" id="tapzone" aria-label="Himlen"></div>
       <button class="btn next hidden" data-next type="button">Videre</button>
     </section>
